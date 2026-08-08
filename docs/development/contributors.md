@@ -11,9 +11,8 @@ The Synexis / SLAIC073 Transport AI Assistant project is built with contribution
    - Web Frontend Application (`apps/web/`)
 
 2. **Dhananjaya Chamod** (`dhananjaya-hbc`)
-   - Mobile Application Development (`apps/mobile/`) in Expo React Native & TypeScript
+   - Mobile Application Development (`dhananjaya-hbc/transport-app`) in Expo React Native & TypeScript
    - Mobile Backend API integration & error handling improvements
-   - Mobile UI/UX Design System (`constants.ts`, Glassmorphism cards, navigation)
 
 ---
-*Note: All historical contributions from both developer repositories have been preserved and consolidated into this canonical monorepo.*
+*Note: The mobile application is maintained separately in `dhananjaya-hbc/transport-app` and will be integrated into the monorepo in a future release.*

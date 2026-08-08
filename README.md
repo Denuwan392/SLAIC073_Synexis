@@ -4,24 +4,27 @@ Synexis is an industry-standard, multi-modal artificial intelligence platform pr
 
 ---
 
-## 🌟 Monorepo Architecture
+## 🌟 Architecture
 
 ```text
-synexis/
-├── apps/
-│   ├── web/               # Single-page HTML/JS Web Application (Tailwind CSS)
-│   └── mobile/            # Expo React Native & TypeScript Mobile Application
-├── services/
-│   └── backend/           # Modular FastAPI + LangGraph + ChromaDB + Google Gemini AI
-├── docs/
-│   ├── architecture/      # Architectural blueprints & sequence diagrams
-│   ├── api/               # API specs & consumer contract definitions
-│   └── development/       # Contributor acknowledgments & setup guides
-├── infrastructure/        # Docker & deployment configurations
-├── .env.example           # Environment template (NO hardcoded secrets)
-├── docker-compose.yml     # Container orchestration
-└── README.md
+       Web UI
+         │
+         ▼
+  FastAPI Backend
+         │
+   AI / RAG / LangGraph
+         │
+      ChromaDB
+         │
+    Transport Data
 ```
+
+---
+
+## 📦 Applications
+
+* **Web (`apps/web`)** — **Included.** Fully functional responsive web application built with Tailwind CSS and Vanilla JavaScript.
+* **Mobile** — **Planned.** The mobile application (Expo / React Native) is maintained separately by team member Dhananjaya Chamod and will be integrated into the monorepo in a future release.
 
 ---
 
@@ -49,7 +52,7 @@ API server starts on `http://localhost:8000`. Access Swagger UI docs at `http://
 
 ### 3. Web Application Setup
 
-To run the web app locally:
+To run the web application locally:
 
 ```bash
 cd apps/web
@@ -58,17 +61,7 @@ npm start
 
 Or simply open `apps/web/index.html` in your browser. It automatically connects to `http://localhost:8000/ask`.
 
-### 4. Mobile Application Setup (Expo / React Native)
-
-```bash
-cd apps/mobile
-npm install
-npm start
-```
-
-Use the Expo Go app on iOS/Android or press `a` for Android Emulator / `i` for iOS Simulator.
-
-### 5. Running via Docker Compose
+### 4. Running via Docker Compose
 
 ```bash
 docker-compose up --build
@@ -78,7 +71,7 @@ docker-compose up --build
 
 ## 🧪 Testing
 
-Run pytest suite for the backend:
+Run the pytest suite for the backend:
 
 ```bash
 cd services/backend
@@ -87,9 +80,15 @@ pytest
 
 ---
 
-## 👥 Contributors
+## 📲 Mobile Integration
+
+The mobile application is maintained in a separate repository by developer Dhananjaya Chamod. The backend provides full REST API contracts (`/ask`, `/schedules`, `/train-tracking/{id}`) ready for seamless mobile client consumption upon final release integration.
+
+---
+
+## 👥 Development & Contributors
 
 * **Denuwan Wijesinghe** — Lead AI Agent & RAG Pipeline Developer
-* **Dhananjaya Chamod** — Mobile Application (React Native / Expo) Developer
+* **Dhananjaya Chamod** — Mobile Application Developer (Separate Repository)
 
-See [docs/development/contributors.md](docs/development/contributors.md) for full attribution.
+See [docs/development/contributors.md](docs/development/contributors.md) for details.
