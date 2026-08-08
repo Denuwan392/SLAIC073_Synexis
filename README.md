@@ -5,9 +5,9 @@
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-green.svg)](https://fastapi.tiangolo.com/)
-[![LangGraph](https://img.shields.io/badge/LangGraph-Agent Framework-orange.svg)](https://github.com/langchain-ai/langgraph)
-[![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector Store-purple.svg)](https://www.trychroma.com/)
-[![Gemini AI](https://img.shields.io/badge/Google Gemini-2.5 Flash Lite-cyan.svg)](https://ai.google.dev/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Agent%20Framework-orange.svg)](https://github.com/langchain-ai/langgraph)
+[![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector%20Store-purple.svg)](https://www.trychroma.com/)
+[![Gemini AI](https://img.shields.io/badge/Google%20Gemini-2.5%20Flash%20Lite-cyan.svg)](https://ai.google.dev/)
 
 ---
 
