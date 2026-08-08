@@ -1,0 +1,13 @@
+{
+  "name": "synexis-web",
+  "version": "1.0.0",
+  "description": "Synexis Transport AI - Web Application",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve -l 3000 .",
+    "start": "npx serve -l 3000 ."
+  },
+  "keywords": ["transport", "sri-lanka", "ai", "gemini", "web"],
+  "author": "Synexis Team",
+  "license": "MIT"
+}

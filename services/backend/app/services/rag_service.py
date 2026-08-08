@@ -1,0 +1,135 @@
+import json
+import re
+from typing import List, Dict, Any
+from google import genai
+from app.core.config import settings
+from app.services.chroma_service import db, embedding_fn
+
+# Initialize GenAI client if key exists
+def get_genai_client():
+    if settings.GOOGLE_API_KEY:
+        return genai.Client(api_key=settings.GOOGLE_API_KEY)
+    return None
+
+def retrieve_routes(query: str, top_k: int = 5) -> List[str]:
+    """Perform vector similarity search against ChromaDB."""
+    try:
+        embedding_fn.document_mode = False
+        query_embedding = embedding_fn([query])[0]
+        results = db.query(
+            query_embeddings=[query_embedding],
+            n_results=top_k
+        )
+        if results and results.get("documents") and len(results["documents"]) > 0:
+            return results["documents"][0]
+        return []
+    except Exception as e:
+        print(f"Error querying ChromaDB: {e}")
+        return []
+
+def classify_query(query: str) -> Dict[str, Any]:
+    """Classify language and transit intent using Gemini."""
+    client = get_genai_client()
+    if not client:
+        return {
+            "is_transport_query": True,
+            "detected_language": "en",
+            "needs_realtime": "train" in query.lower(),
+            "route_mentioned": None
+        }
+
+    prompt = f"""
+Analyze the transport query and return strict JSON format only.
+
+QUERY: {query}
+
+JSON Output Format:
+{{
+    "is_transport_query": true/false,
+    "detected_language": "en"/"si"/"ta",
+    "needs_realtime": true/false,
+    "route_mentioned": "Colombo to Kandy" (or null)
+}}
+"""
+    try:
+        response = client.models.generate_content(
+            model=settings.GEMINI_MODEL,
+            contents=prompt
+        )
+        raw = response.text.strip()
+        clean = re.sub(r"^```(json)?|```$", "", raw, flags=re.MULTILINE).strip()
+        return json.loads(clean)
+    except Exception as e:
+        print(f"Query classification error: {e}")
+        return {
+            "is_transport_query": True,
+            "detected_language": "en",
+            "needs_realtime": "train" in query.lower(),
+            "route_mentioned": None
+        }
+
+def generate_transport_answer(query: str, passages: List[str]) -> str:
+    """Synthesize natural language answer for buses and trains using retrieved passages."""
+    client = get_genai_client()
+    if not client:
+        if passages:
+            return "Here are matching schedules:\n" + "\n".join([f"• {p}" for p in passages[:5]])
+        return "Sorry, Google Gemini API key is not configured and vector DB returned no exact match."
+
+    prompt = f"""
+You are Synexis, a helpful Sri Lanka public transport assistant (buses and trains).
+Use ONLY the passages below to answer the user question.
+
+RULES:
+- Answer questions about BOTH buses AND trains based on the provided passages.
+- If user asks for "buses" without specifying type → list ALL buses (both Luxury and Normal).
+- If user asks for "trains" → show train schedules with train names/numbers.
+- For trains: Show train name/number, departure, arrival, and stops.
+- For buses: Show bus number, service type, departure, arrival.
+- If no buses/trains match → say: "No luxury/normal buses or trains found matching this route."
+- ALWAYS format output clearly with headings, bullet points, and emojis (🚌, 🚆, ⏱️).
+- If listing many items (> 10), group by service type and show top 5-10 per group.
+- Include travel time if available.
+
+QUESTION: {query}
+"""
+    for i, passage in enumerate(passages, 1):
+        passage_oneline = passage.replace("\n", " ")
+        prompt += f"\nPASSAGE {i}: {passage_oneline}"
+
+    try:
+        response = client.models.generate_content(
+            model=settings.GEMINI_MODEL,
+            contents=prompt
+        )
+        return response.text
+    except Exception as e:
+        print(f"Answer generation error: {e}")
+        return f"Error generating answer: {str(e)}"
+
+def translate_response(text: str, target_lang: str) -> str:
+    """Translate answer to target language (si/ta)."""
+    if target_lang not in ["si", "ta"]:
+        return text
+        
+    client = get_genai_client()
+    if not client:
+        return text
+
+    lang_name = "Sinhala" if target_lang == "si" else "Tamil"
+    prompt = f"""
+Translate the following Sri Lanka transport information accurately into {lang_name}.
+Keep formatting, emojis, bus/train numbers, and schedule times EXACTLY as they are.
+
+TEXT TO TRANSLATE:
+{text}
+"""
+    try:
+        response = client.models.generate_content(
+            model=settings.GEMINI_MODEL,
+            contents=prompt
+        )
+        return response.text.strip()
+    except Exception as e:
+        print(f"Translation error: {e}")
+        return text

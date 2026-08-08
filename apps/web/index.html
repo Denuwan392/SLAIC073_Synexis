@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🇱🇰 Sri Lanka Transport Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+        }
+        .msg {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .typing-indicator {
+            display: inline-block;
+            width: 3px;
+            height: 16px;
+            background: #1976d2;
+            margin: 0 2px;
+            animation: typing 1s infinite;
+        }
+        .typing-indicator:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        .sidebar {
+            height: 100vh;
+            transition: all 0.3s ease;
+        }
+        .main-content {
+            height: 100vh;
+            transition: all 0.3s ease;
+        }
+        .markdown-content h1, .markdown-content h2, .markdown-content h3, 
+        .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+            margin-top: 0.8rem;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            font-size: 1.15em;
+        }
+        .markdown-content p {
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+            font-size: 1em;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin-bottom: 0.8rem;
+            padding-left: 1.3rem;
+            font-size: 1em;
+        }
+        .markdown-content li {
+            margin-bottom: 0.25rem;
+            line-height: 1.5;
+        }
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0.8rem;
+            font-size: 0.95em;
+        }
+        .markdown-content th, .markdown-content td {
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        .markdown-content th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+        .markdown-content code {
+            background-color: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+            font-size: 0.9em;
+        }
+        .markdown-content pre {
+            background-color: #f3f4f6;
+            padding: 0.9rem;
+            border-radius: 0.4rem;
+            overflow-x: auto;
+            margin-bottom: 0.9rem;
+            font-size: 0.95em;
+        }
+        .markdown-content * {
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+        
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 280px;
+                transform: translateX(-100%);
+                z-index: 50;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                width: 100%;
+            }
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+                display: none;
+            }
+            .overlay.active {
+                display: block;
+            }
+            body {
+                font-size: 14px;
+            }
+            .container {
+                padding: 0.5rem;
+            }
+            #chatbox {
+                padding: 0.5rem;
+            }
+            .max-w-3xl {
+                max-width: 100%;
+            }
+            .w-56 {
+                width: 280px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                font-size: 13px;
+            }
+            .p-4 {
+                padding: 0.75rem;
+            }
+            .p-3 {
+                padding: 0.5rem;
+            }
+            .text-base {
+                font-size: 0.95rem;
+            }
+            .text-sm {
+                font-size: 0.875rem;
+            }
+            .text-xs {
+                font-size: 0.75rem;
+            }
+            .rounded-lg {
+                border-radius: 0.375rem;
+            }
+            .space-x-3 > * + * {
+                margin-left: 0.5rem;
+            }
+            .space-y-4 > * + * {
+                margin-top: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="overlay" id="overlay"></div>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar w-56 bg-white shadow-md border-r border-gray-200 flex flex-col">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 bg-gradient-to-r from-blue-600 to-green-500 rounded-md flex items-center justify-center">
+                        <i class="fas fa-bus text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-lg font-bold text-gray-800">NEED TO GO</h1>
+                </div>
+            </div>
+            <div class="p-4 overflow-y-auto flex-1">
+                <div class="mb-5">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Quick Links</h3>
+                    <div class="space-y-2">
+                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                            <i class="fas fa-route text-blue-600"></i>
+                            <span>Popular Routes</span>
+                        </button>
+                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                            <i class="fas fa-train text-green-600"></i>
+                            <span>Train Schedules</span>
+                        </button>
+                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                            <i class="fas fa-clock text-orange-600"></i>
+                            <span>Real-time Info</span>
+                        </button>
+                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                            <i class="fas fa-map-marked-alt text-purple-600"></i>
+                            <span>Route Maps</span>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Languages</h3>
+                    <div class="space-y-2">
+                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                            <i class="fas fa-language text-gray-600"></i>
+                            <span>Sinhala</span>
+                        </button>
+                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                            <i class="fas fa-language text-gray-600"></i>
+                            <span>Tamil</span>
+                        </button>
+                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                            <i class="fas fa-language text-gray-600"></i>
+                            <span>English</span>
+                        </button>
+                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                            <i class="fas fa-globe text-blue-600"></i>
+                            <span>Auto Detect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center space-x-2 text-gray-600 text-sm">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content flex-1 flex flex-col">
+            <!-- Header -->
+            <div class="bg-white border-b border-gray-200 px-5 py-3 flex items-center justify-between shadow-sm">
+                <div class="flex items-center space-x-3">
+                    <button id="menuToggle" class="md:hidden p-2 rounded-md hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-bus text-white text-xs"></i>
+                        </div>
+                        <h2 class="text-base font-semibold text-gray-800">Transport Assistant</h2>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-1 text-green-600">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-xs font-medium">Online</span>
+                    </div>
+                    <button class="p-2 rounded-md hover:bg-gray-100 transition-colors relative">
+                        <i class="fas fa-bell text-gray-600"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="flex-1 overflow-y-auto p-5">
+                <div id="chatbox" class="max-w-3xl mx-auto space-y-5">
+                    <!-- Messages will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="border-t border-gray-200 bg-white p-5">
+                <div class="max-w-3xl mx-auto">
+                    <div class="flex items-end space-x-3">
+                        <div class="flex-1 relative">
+                            <textarea 
+                                id="userInput" 
+                                placeholder="Ask about bus, train, or travel information in Sinhala, Tamil, or English..." 
+                                rows="1"
+                                class="w-full p-3.5 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm transition-all duration-200"
+                                onInput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'"
+                            ></textarea>
+                            <div class="absolute right-3 bottom-3 flex space-x-2">
+                                <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors hover:bg-gray-100 rounded-md">
+                                    <i class="fas fa-paperclip text-sm"></i>
+                                </button>
+                                <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors hover:bg-gray-100 rounded-md">
+                                    <i class="fas fa-microphone text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button 
+                            onclick="sendMessage()" 
+                            class="bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white p-3.5 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md hover:shadow-lg transform hover:scale-105"
+                        >
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="flex justify-center mt-4 text-xs text-gray-500 space-x-6">
+                        <div class="flex items-center space-x-1.5 bg-gray-100 px-2 py-1 rounded-full">
+                            <i class="fas fa-bus text-blue-600"></i>
+                            <span>Bus</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5 bg-gray-100 px-2 py-1 rounded-full">
+                            <i class="fas fa-train text-green-600"></i>
+                            <span>Train</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5 bg-gray-100 px-2 py-1 rounded-full">
+                            <i class="fas fa-taxi text-orange-600"></i>
+                            <span>Taxi</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5 bg-gray-100 px-2 py-1 rounded-full">
+                            <i class="fas fa-ship text-purple-600"></i>
+                            <span>Ferry</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar on mobile
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        });
+        
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+
+        // Auto welcome with enhanced message
+        window.onload = () => {
+            appendMessage("Welcome to Sri Lanka Transport Assistant! I can help you with bus, train, and travel information across Sri Lanka. Ask me questions like:\n\n• මට කොළඹ සිට ගාල්ලට යන බස් රථ කීයට තියෙනවාද?\n• What time is the next train to Kandy?\n• கொழும்பிலிருந்து மாத்தளைக்கு பேருந்து எப்போது?\n\nI understand Sinhala, Tamil, and English!", "bot");
+        };
+
+        async function sendMessage() {
+            const input = document.getElementById("userInput");
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendMessage(text, "user");
+            input.value = "";
+            input.style.height = 'auto';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                // Dynamic API URL resolution with fallback for local dev, static serving, or remote hosting
+                const API_URL = window.SYNEXIS_API_URL || 
+                    (window.location.protocol === "file:" ? "http://localhost:8000/ask" : "/ask");
+
+                const res = await fetch(API_URL, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ query: text })
+                });
+
+                const data = await res.json();
+                
+                // Remove typing indicator
+                removeTypingIndicator();
+                
+                appendMessage(data.final_answer || "Sorry, I couldn't find an answer. Please try rephrasing your question or ask about a different route.", "bot");
+            } catch (err) {
+                removeTypingIndicator();
+                appendMessage("Server error: " + err.message + "\n\nPlease try again later or check your internet connection.", "bot");
+            }
+        }
+
+        function showTypingIndicator() {
+            const box = document.getElementById("chatbox");
+            const typingDiv = document.createElement("div");
+            typingDiv.id = "typing-indicator";
+            typingDiv.className = "flex items-start space-x-3 p-4 bg-gray-50 rounded-xl max-w-3xl";
+            typingDiv.innerHTML = `
+                <div class="w-9 h-9 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-robot text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-medium text-gray-800 mb-2 text-sm">Assistant</p>
+                    <div class="flex space-x-1">
+                        <span class="typing-indicator"></span>
+                        <span class="typing-indicator"></span>
+                        <span class="typing-indicator"></span>
+                    </div>
+                </div>
+            `;
+            box.appendChild(typingDiv);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById("typing-indicator");
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function appendMessage(text, sender) {
+            const box = document.getElementById("chatbox");
+            const div = document.createElement("div");
+            
+            if (sender === 'user') {
+                div.className = "flex justify-end";
+                div.innerHTML = `
+                    <div class="max-w-3xl bg-blue-50 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-1 text-right">
+                                <p class="font-medium text-gray-800 mb-2 text-sm">You</p>
+                                <p class="whitespace-pre-line text-sm">${text}</p>
+                            </div>
+                            <div class="w-9 h-9 bg-green-500 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user text-sm"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                div.className = "flex items-start space-x-3 p-4 bg-white rounded-xl max-w-3xl shadow-sm border border-gray-100";
+                div.innerHTML = `
+                    <div class="w-9 h-9 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-sm"></i>
+                    </div>
+                    <div class="flex-1 markdown-content">
+                        <p class="font-medium text-gray-800 mb-2 text-sm">Assistant</p>
+                        <div class="text-sm leading-relaxed">${marked.parse(text)}</div>
+                    </div>
+                `;
+            }
+            
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        document.getElementById("userInput").addEventListener("keypress", e => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Auto-resize textarea
+        document.getElementById("userInput").addEventListener("input", function() {
+            this.style.height = "auto";
+            this.style.height = (this.scrollHeight) + "px";
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
