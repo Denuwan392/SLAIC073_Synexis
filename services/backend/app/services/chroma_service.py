@@ -80,11 +80,21 @@ db = chroma_client.get_or_create_collection(
 
 def init_chroma_db():
     """Build or load ChromaDB. Skips re-indexing if vector DB is already populated."""
+    global db
     try:
-        current_count = db.count()
+        try:
+            current_count = db.count()
+        except Exception:
+            chroma_client.delete_collection("sri_lanka_transport")
+            db = chroma_client.get_or_create_collection(
+                name="sri_lanka_transport",
+                embedding_function=embedding_fn
+            )
+            current_count = 0
+
         print(f"Chroma DB status: {current_count} documents indexed.")
         if current_count == 0:
-            print("Database is empty. Building Chroma DB from documents.py...")
+            print("Building Chroma DB from documents.py...")
             all_chunks = []
             for doc in documents:
                 chunks = parse_route_document(doc)
@@ -107,6 +117,6 @@ def init_chroma_db():
             else:
                 print("No document chunks parsed.")
         else:
-            print("Existing Chroma DB loaded cleanly (skipped rebuild).")
+            print("Existing Chroma DB loaded cleanly.")
     except Exception as e:
         print(f"Warning during Chroma DB initialization: {e}")
