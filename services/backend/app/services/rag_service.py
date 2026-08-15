@@ -12,12 +12,12 @@ def get_genai_client():
     return None
 
 def retrieve_routes(query: str, top_k: int = 10) -> List[str]:
-    """Perform Directional Hybrid RAG Search with transit mode filtering (train vs bus)."""
+    """Perform Directional Hybrid RAG Search with strict transit mode isolation (train vs bus)."""
     from app.data.documents import documents
     
     query_clean = query.lower()
     is_train_query = "train" in query_clean
-    is_bus_query = "bus" in query_clean
+    is_bus_query = "bus" in query_clean or "buses" in query_clean
     
     passages = []
     
@@ -28,7 +28,7 @@ def retrieve_routes(query: str, top_k: int = 10) -> List[str]:
     ]
     found_locations = [loc for loc in known_locations if loc in query_clean]
     
-    # 1. Mode-filtered location search (e.g. Galle + Train)
+    # 1. Mode-filtered location search (e.g. Kandy + Bus)
     if found_locations:
         loc_matches = []
         for doc in documents:
@@ -38,7 +38,7 @@ def retrieve_routes(query: str, top_k: int = 10) -> List[str]:
                     continue
                 line_lower = line_clean.lower()
                 
-                # Filter by mode if user specifically asks for train/bus
+                # Strict Mode Isolation
                 if is_train_query and "train" not in line_lower:
                     continue
                 if is_bus_query and "bus" not in line_lower:
@@ -53,34 +53,26 @@ def retrieve_routes(query: str, top_k: int = 10) -> List[str]:
                 break
         passages.extend(loc_matches)
 
-    # 2. General location search if mode filter returned fewer results
-    if len(passages) < top_k and found_locations:
-        for doc in documents:
-            for line in doc.split("\n"):
-                line_clean = line.strip()
-                if not line_clean or line_clean in passages:
-                    continue
-                line_lower = line_clean.lower()
-                if all(loc in line_lower for loc in found_locations):
-                    passages.append(line_clean)
-                    if len(passages) >= top_k:
-                        break
-            if len(passages) >= top_k:
-                break
-
-    # 3. ChromaDB Vector Search Fallback
+    # 2. Vector Search Fallback (with mode filtering)
     if len(passages) < top_k:
         try:
             embedding_fn.document_mode = False
             query_embedding = embedding_fn([query])[0]
             results = db.query(
                 query_embeddings=[query_embedding],
-                n_results=top_k
+                n_results=top_k * 2
             )
             if results and results.get("documents") and len(results["documents"]) > 0:
                 for vec_doc in results["documents"][0]:
+                    vec_lower = vec_doc.lower()
+                    if is_train_query and "train" not in vec_lower:
+                        continue
+                    if is_bus_query and "bus" not in vec_lower:
+                        continue
                     if vec_doc not in passages:
                         passages.append(vec_doc)
+                        if len(passages) >= top_k:
+                            break
         except Exception as e:
             print(f"Error querying ChromaDB: {e}")
 
@@ -129,6 +121,16 @@ JSON Output Format:
 
 def generate_transport_answer(query: str, passages: List[str]) -> str:
     """Synthesize natural language answer for buses and trains using retrieved passages."""
+    query_clean = query.lower()
+    is_bus = "bus" in query_clean or "buses" in query_clean
+    is_train = "train" in query_clean or "trains" in query_clean
+
+    # Filter passages strictly to requested mode
+    if is_bus:
+        passages = [p for p in passages if "bus" in p.lower()]
+    elif is_train:
+        passages = [p for p in passages if "train" in p.lower()]
+
     client = get_genai_client()
     if not client:
         if passages:
@@ -140,8 +142,8 @@ You are Synexis, a helpful Sri Lanka public transport assistant (buses and train
 Use ONLY the passages below to answer the user question.
 
 RULES:
-- Answer questions about BOTH buses AND trains based on the provided passages.
-- List ALL matching bus services (Express, Luxury, Normal, Intercity, etc.) and trains found in the passages.
+- If user asks for "buses" → list ONLY bus options. Do NOT list trains.
+- If user asks for "trains" → list ONLY train options. Do NOT list buses.
 - For trains: Show train name/number, departure, arrival, and stops if available.
 - For buses: Show bus number, service type, departure, and arrival times.
 - Format output clearly with headings, bullet points, and emojis (🚌, 🚆, ⏱️).
@@ -163,8 +165,7 @@ QUESTION: {query}
         print(f"Answer generation error: {e}")
         if passages:
             formatted = "\n".join([f"• {p.strip()}" for p in passages[:6]])
-            has_train = any("train" in p.lower() for p in passages)
-            header = "🚆 **Sri Lanka Railway Train Schedules:**" if has_train else "🚌 **Sri Lanka Transit Bus Schedules:**"
+            header = "🚆 **Sri Lanka Railway Train Schedules:**" if is_train else "🚌 **Sri Lanka Transit Bus Schedules:**"
             return f"{header}\n\n{formatted}"
         return "Sorry, transit service is temporarily busy. Please try again in a moment."
 

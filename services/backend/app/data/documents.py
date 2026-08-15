@@ -965,7 +965,10 @@ Route: Colombo to Monaragala. Bus: Monaragala 10. Service: Normal. Departs: 23:4
 # Add these as DOCUMENT6, DOCUMENT7, etc.
 
 DOCUMENT6 = """
+Route: Colombo to Kandy. Bus: EX-1 (Central Expressway). Service: Luxury AC. Departs: 05:00, 05:30, 06:00, 06:30, 07:00, 07:30, 08:00, 08:30, 09:00, 09:30, 10:00, 11:00, 12:00, 13:00, 14:00, 15:00, 16:00, 17:00, 18:00, 19:00, 20:00. Travel time: ~2.5 hours.
+Route: Colombo to Kandy. Bus: 01 (SLTB CTB). Service: Normal. Departs: Every 15 minutes 24 hours daily. Travel time: ~3.5 hours.
 Route: Colombo to Kandy. Bus: 101. Service: Express. Departs: 5:30, 7:00, 8:30, 10:00, 12:00, 14:00, 16:00, 18:00. Arrives: ~2.5 hours later.
+Route: Kandy to Colombo. Bus: EX-2 (Central Expressway). Service: Luxury AC. Departs: 05:15, 05:45, 06:15, 06:45, 07:15, 07:45, 08:15, 09:15, 10:15, 11:15, 12:15, 13:15, 14:15, 15:15, 16:15, 17:15, 18:15, 19:15. Travel time: ~2.5 hours.
 Route: Kandy to Colombo. Bus: 102. Service: Express. Departs: 6:00, 7:30, 9:00, 11:00, 13:00, 15:00, 17:00, 19:00.
 """
 
