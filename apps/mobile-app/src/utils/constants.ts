@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://localhost:8000'; // Base URL for the FastAPI backend (change for mobile physical device testing)
+export const API_BASE_URL = 'http://10.10.11.13:8000'; // Mac LAN IP for iPhone / physical device testing
 
 export const DEFAULT_LANGUAGE = 'en'; // Default language for the app
 
