@@ -1,22 +1,26 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, SafeAreaView, ScrollView } from 'react-native';
-import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS, POPULAR_DEPARTURES } from '../utils/constants';
+import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS, SIGNATURE_DEPARTURES } from '../utils/constants';
 
 export default function HomeScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         
-        {/* Header */}
+        {/* Signature Brand Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.appName}>Synexis Transit</Text>
-            <View style={styles.statusRow}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusText}>Sri Lanka Railways & Bus Network</Text>
+            <View style={styles.brandRow}>
+              <Text style={styles.brandTitle}>SYNEXIS</Text>
+              <View style={styles.liveBadge}>
+                <View style={styles.liveDot} />
+                <Text style={styles.liveText}>LIVE TRANSIT</Text>
+              </View>
             </View>
+            <Text style={styles.subTitle}>Sri Lanka Public Transport Network</Text>
           </View>
+
           <TouchableOpacity 
             style={styles.settingsBtn}
             onPress={() => navigation.navigate('Settings')}
@@ -26,93 +30,107 @@ export default function HomeScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
 
-        {/* Route Search Card (Citymapper / Apple Maps Style) */}
-        <TouchableOpacity 
-          style={styles.plannerCard}
-          onPress={() => navigation.navigate('Chat')}
-          activeOpacity={0.9}
-        >
-          <View style={styles.locationField}>
-            <View style={[styles.dot, styles.dotOrigin]} />
-            <Text style={styles.locationTextOrigin}>Current Location (Colombo Fort)</Text>
-          </View>
+        {/* Bespoke Route Node Finder */}
+        <View style={styles.routeCard}>
+          <Text style={styles.routeCardHeader}>FIND ROUTE & SCHEDULES</Text>
           
-          <View style={styles.lineDivider} />
+          <TouchableOpacity 
+            style={styles.nodeWrapper}
+            onPress={() => navigation.navigate('Chat')}
+            activeOpacity={0.9}
+          >
+            <View style={styles.nodeRow}>
+              <View style={[styles.nodeDot, styles.nodeOrigin]} />
+              <View style={styles.nodeTextWrapper}>
+                <Text style={styles.nodeLabel}>ORIGIN</Text>
+                <Text style={styles.nodeValue}>Colombo Fort Station</Text>
+              </View>
+            </View>
 
-          <View style={styles.locationField}>
-            <View style={[styles.dot, styles.dotDest]} />
-            <Text style={styles.locationPlaceholder}>Where do you want to go?</Text>
-          </View>
+            <View style={styles.trackLine} />
 
-          <View style={styles.searchActionRow}>
-            <Text style={styles.searchActionText}>Ask Transit AI for routes, times & schedules ➔</Text>
-          </View>
-        </TouchableOpacity>
+            <View style={styles.nodeRow}>
+              <View style={[styles.nodeDot, styles.nodeDest]} />
+              <View style={styles.nodeTextWrapper}>
+                <Text style={styles.nodeLabel}>DESTINATION</Text>
+                <Text style={styles.nodeValuePlaceholder}>Where do you want to go?</Text>
+              </View>
+            </View>
 
-        {/* Line Categories */}
-        <View style={styles.linesRow}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.linesScroll}>
-            <TouchableOpacity style={styles.lineChip} onPress={() => navigation.navigate('Chat')}>
-              <Text style={styles.lineIcon}>🚆</Text>
-              <Text style={styles.lineText}>Coastal Line</Text>
+            <TouchableOpacity 
+              style={styles.actionBtn}
+              onPress={() => navigation.navigate('Chat')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.actionBtnText}>Search Schedules & Ask AI ➔</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.lineChip} onPress={() => navigation.navigate('Chat')}>
-              <Text style={styles.lineIcon}>🚆</Text>
-              <Text style={styles.lineText}>Main Line</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.lineChip} onPress={() => navigation.navigate('Chat')}>
-              <Text style={styles.lineIcon}>🚌</Text>
-              <Text style={styles.lineText}>Expressway AC</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.lineChip} onPress={() => navigation.navigate('Chat')}>
-              <Text style={styles.lineIcon}>🚌</Text>
-              <Text style={styles.lineText}>SLTB Intercity</Text>
-            </TouchableOpacity>
-          </ScrollView>
+          </TouchableOpacity>
         </View>
 
-        {/* Next Departures Section */}
+        {/* Transit Line Grid */}
+        <View style={styles.linesGrid}>
+          <TouchableOpacity style={styles.lineCard} onPress={() => navigation.navigate('Chat')}>
+            <Text style={styles.lineCardIcon}>🚆</Text>
+            <Text style={styles.lineCardTitle}>Coastal Rail</Text>
+            <Text style={styles.lineCardSub}>Colombo ➔ Galle</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.lineCard} onPress={() => navigation.navigate('Chat')}>
+            <Text style={styles.lineCardIcon}>🚆</Text>
+            <Text style={styles.lineCardTitle}>Main Line Rail</Text>
+            <Text style={styles.lineCardSub}>Colombo ➔ Kandy</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.lineCard} onPress={() => navigation.navigate('Chat')}>
+            <Text style={styles.lineCardIcon}>🚌</Text>
+            <Text style={styles.lineCardTitle}>Southern Highway</Text>
+            <Text style={styles.lineCardSub}>Matara Luxury AC</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.lineCard} onPress={() => navigation.navigate('Chat')}>
+            <Text style={styles.lineCardIcon}>🚌</Text>
+            <Text style={styles.lineCardTitle}>Central Highway</Text>
+            <Text style={styles.lineCardSub}>Kandy Express</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Digital Station Departure Board */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Featured Departures</Text>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>TERMINAL DEPARTURE BOARD</Text>
+            <Text style={styles.liveClock}>REAL-TIME</Text>
+          </View>
 
-          {POPULAR_DEPARTURES.map((item) => {
-            const isTrain = item.type === 'train';
-            return (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.departureCard}
-                onPress={() => navigation.navigate('Chat')}
-                activeOpacity={0.8}
-              >
-                <View style={styles.cardHeader}>
-                  <View style={[
-                    styles.badge, 
-                    isTrain ? styles.trainBadge : styles.busBadge
-                  ]}>
-                    <Text style={[
-                      styles.badgeText,
-                      isTrain ? styles.trainBadgeText : styles.busBadgeText
-                    ]}>
-                      {isTrain ? '🚆 TRAIN' : '🚌 BUS'} • {item.line}
-                    </Text>
-                  </View>
-                  <Text style={styles.departureTime}>{item.departs}</Text>
-                </View>
+          {SIGNATURE_DEPARTURES.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.departureRow}
+              onPress={() => navigation.navigate('Chat')}
+              activeOpacity={0.8}
+            >
+              <View style={styles.timeBox}>
+                <Text style={styles.depTime}>{item.departs}</Text>
+                <Text style={styles.depStatus}>{item.status}</Text>
+              </View>
 
-                <Text style={styles.routeTitle}>{item.route}</Text>
-                
-                <View style={styles.cardFooter}>
-                  <Text style={styles.vehicleName}>{item.vehicle}</Text>
-                  <Text style={styles.duration}>Est. {item.duration}</Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+              <View style={styles.routeBox}>
+                <Text style={styles.depRoute}>{item.route}</Text>
+                <Text style={styles.depVehicle}>{item.vehicle}</Text>
+              </View>
+
+              <View style={[styles.lineBadge, { backgroundColor: item.badgeBg }]}>
+                <Text style={[styles.lineBadgeText, { color: item.badgeColor }]}>
+                  {item.line}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Synexis Mobile • Sri Lanka Public Transport API</Text>
+          <Text style={styles.footerText}>Synexis Obsidian Edition • Sri Lanka Transit Engine</Text>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -133,27 +151,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: SPACING.md,
   },
-  appName: {
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  brandTitle: {
     fontSize: TYPOGRAPHY.fontSize['2xl'],
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
-    letterSpacing: -0.5,
+    letterSpacing: 2,
   },
-  statusRow: {
+  liveBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 2,
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
+    marginLeft: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
   },
-  statusDot: {
+  liveDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#10B981',
-    marginRight: 6,
+    backgroundColor: COLORS.emerald,
+    marginRight: 4,
   },
-  statusText: {
+  liveText: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.emerald,
+    letterSpacing: 0.5,
+  },
+  subTitle: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textSecondary,
+    marginTop: 2,
   },
   settingsBtn: {
     width: 38,
@@ -168,163 +203,187 @@ const styles = StyleSheet.create({
   settingsIcon: {
     fontSize: 16,
   },
-  plannerCard: {
+  routeCard: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
-    padding: SPACING.md,
+    padding: SPACING.lg,
     marginVertical: SPACING.sm,
     borderWidth: 1,
     borderColor: COLORS.border,
     ...SHADOWS.md,
   },
-  locationField: {
+  routeCardHeader: {
+    fontSize: 11,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.cyan,
+    letterSpacing: 1.5,
+    marginBottom: SPACING.md,
+  },
+  nodeWrapper: {
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  nodeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
   },
-  dot: {
+  nodeDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
     marginRight: SPACING.md,
   },
-  dotOrigin: {
-    backgroundColor: '#10B981',
+  nodeOrigin: {
+    backgroundColor: COLORS.emerald,
   },
-  dotDest: {
-    backgroundColor: COLORS.primary,
+  nodeDest: {
+    backgroundColor: COLORS.cyan,
   },
-  locationTextOrigin: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  nodeTextWrapper: {
+    flex: 1,
   },
-  locationPlaceholder: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textPrimary,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  lineDivider: {
-    height: 1,
-    backgroundColor: COLORS.borderLight,
-    marginVertical: SPACING.xs,
-    marginLeft: 24,
-  },
-  searchActionRow: {
-    marginTop: SPACING.md,
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.borderLight,
-    alignItems: 'flex-end',
-  },
-  searchActionText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.primary,
+  nodeLabel: {
+    fontSize: 10,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textTertiary,
+    letterSpacing: 1,
   },
-  linesRow: {
+  nodeValue: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  nodeValuePlaceholder: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.cyan,
+  },
+  trackLine: {
+    height: 16,
+    width: 2,
+    backgroundColor: COLORS.border,
+    marginLeft: 4,
+    marginVertical: 4,
+  },
+  actionBtn: {
+    backgroundColor: COLORS.cyan,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.md - 2,
+    alignItems: 'center',
+    marginTop: SPACING.lg,
+  },
+  actionBtnText: {
+    color: COLORS.textInverse,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    letterSpacing: 0.5,
+  },
+  linesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     marginVertical: SPACING.md,
-  },
-  linesScroll: {
     gap: SPACING.xs,
   },
-  lineChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.full,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.sm,
-  },
-  lineIcon: {
-    fontSize: 14,
-    marginRight: 6,
-  },
-  lineText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  section: {
-    marginBottom: SPACING.lg,
-  },
-  sectionTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: SPACING.sm,
-    marginLeft: 2,
-  },
-  departureCard: {
+  lineCard: {
+    width: '48.5%',
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
     borderWidth: 1,
     borderColor: COLORS.border,
     ...SHADOWS.sm,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.xs,
+  lineCardIcon: {
+    fontSize: 22,
+    marginBottom: 6,
   },
-  badge: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 3,
-    borderRadius: RADIUS.sm,
-  },
-  trainBadge: {
-    backgroundColor: COLORS.trainBadgeBg,
-  },
-  busBadge: {
-    backgroundColor: COLORS.busBadgeBg,
-  },
-  badgeText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  trainBadgeText: {
-    color: COLORS.trainBadgeText,
-  },
-  busBadgeText: {
-    color: COLORS.busBadgeText,
-  },
-  departureTime: {
+  lineCardTitle: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
   },
-  routeTitle: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginVertical: 4,
+  lineCardSub: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textSecondary,
+    marginTop: 2,
   },
-  cardFooter: {
+  section: {
+    marginVertical: SPACING.md,
+  },
+  sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
+    marginBottom: SPACING.sm,
+    paddingHorizontal: 2,
   },
-  vehicleName: {
+  sectionTitle: {
+    fontSize: 11,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textSecondary,
+    letterSpacing: 1,
+  },
+  liveClock: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.emerald,
+    letterSpacing: 1,
+  },
+  departureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.xs,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  timeBox: {
+    width: 75,
+  },
+  depTime: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  depStatus: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.emerald,
+    marginTop: 2,
+  },
+  routeBox: {
+    flex: 1,
+    paddingHorizontal: SPACING.sm,
+  },
+  depRoute: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  depVehicle: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textSecondary,
+    marginTop: 2,
   },
-  duration: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textTertiary,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  lineBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+  },
+  lineBadgeText: {
+    fontSize: 11,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
   footer: {
     alignItems: 'center',
-    paddingVertical: SPACING.lg,
+    paddingVertical: SPACING.xl,
   },
   footerText: {
     fontSize: TYPOGRAPHY.fontSize.xs,

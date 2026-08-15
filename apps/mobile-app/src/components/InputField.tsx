@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../utils/constants';
+import { COLORS, TYPOGRAPHY, SPACING, RADIUS } from '../utils/constants';
 
 interface InputFieldProps {
   onSend: (message: string) => void;
@@ -73,12 +73,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: RADIUS.md,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.cyan,
     justifyContent: 'center',
     alignItems: 'center',
   },
   sendBtnDisabled: {
-    backgroundColor: COLORS.textTertiary,
+    backgroundColor: COLORS.surfaceSubtle,
     opacity: 0.5,
   },
   sendIcon: {

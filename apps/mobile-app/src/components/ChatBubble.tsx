@@ -19,7 +19,10 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
     <View style={[styles.container, isUser ? styles.userContainer : styles.botContainer]}>
       <View style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}>
         {!isUser && (
-          <Text style={styles.botTitle}>Synexis AI</Text>
+          <View style={styles.botBadge}>
+            <Text style={styles.botTitle}>SYNEXIS AI</Text>
+            <View style={styles.verifiedDot} />
+          </View>
         )}
         <Text style={[styles.messageText, isUser ? styles.userText : styles.botText]}>
           {message.content}
@@ -49,7 +52,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   userBubble: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.userMessage,
     borderBottomRightRadius: 2,
     ...SHADOWS.sm,
   },
@@ -60,24 +63,37 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     ...SHADOWS.sm,
   },
+  botBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
   botTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontSize: 10,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.primary,
-    marginBottom: 4,
+    color: COLORS.cyan,
+    letterSpacing: 1,
+  },
+  verifiedDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: COLORS.cyan,
+    marginLeft: 6,
   },
   messageText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    lineHeight: TYPOGRAPHY.lineHeight.normal * TYPOGRAPHY.fontSize.base,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    lineHeight: TYPOGRAPHY.lineHeight.normal * TYPOGRAPHY.fontSize.sm,
   },
   userText: {
     color: COLORS.textInverse,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
   botText: {
     color: COLORS.textPrimary,
   },
   timestamp: {
-    fontSize: 11,
+    fontSize: 10,
     marginTop: 6,
   },
   userTimestamp: {

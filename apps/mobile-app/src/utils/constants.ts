@@ -8,51 +8,64 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'ta', name: 'தமிழ்', flag: '🇱🇰' }
 ];
 
-export const CHATBOT_NAME = 'Synexis Assistant';
+export const CHATBOT_NAME = 'Synexis AI';
 export const MAX_MESSAGE_LENGTH = 500;
 export const TIMEOUT_DURATION = 8000;
 
 export const ERROR_MESSAGES = {
-  NETWORK_ERROR: 'Network issue detected. Please try again.',
-  INVALID_INPUT: 'Invalid query. Please try again.',
+  NETWORK_ERROR: 'Network issue detected. Please check connection.',
+  INVALID_INPUT: 'Invalid query input. Please try again.',
   API_ERROR: 'Unable to process transit request.',
 };
 
-// Citymapper / Apple Maps Production Transit Palette
+// Signature Synexis Obsidian & Electric Cyan Palette (Bespoke Production UI)
 export const COLORS = {
-  primary: '#2563EB',         // Citymapper Blue
-  primaryDark: '#1E3A8A',
-  primaryLight: '#EFF6FF',
+  // Brand Canvas
+  background: '#0B0F19',       // Deep Obsidian
+  surface: '#151C2C',          // Elevated Card Slate
+  surfaceSubtle: '#1E293B',    // Dark Pill Fill
+  surfaceHighlight: '#26334D', // Active Hover Fill
   
-  navy: '#0F172A',            // Slate Header
+  // Accents
+  cyan: '#00F2FE',             // Synexis Electric Cyan
+  cyanGlow: 'rgba(0, 242, 254, 0.15)',
+  emerald: '#10B981',          // On-Time Green
+  amber: '#F59E0B',            // Express Bus Amber
+  purple: '#8B5CF6',           // Special Express
   
-  trainBadgeBg: '#DBEAFE',
-  trainBadgeText: '#1E40AF',
+  primary: '#00F2FE',          // Primary Action
+  primaryDark: '#0284C7',
+  primaryLight: '#38BDF8',
   
-  busBadgeBg: '#FEF3C7',
-  busBadgeText: '#92400E',
+  // Line Badges
+  coastalBadgeBg: 'rgba(2, 132, 199, 0.2)',
+  coastalBadgeText: '#38BDF8',
   
-  expressBadgeBg: '#D1FAE5',
-  expressBadgeText: '#065F46',
+  mainLineBadgeBg: 'rgba(13, 148, 136, 0.2)',
+  mainLineBadgeText: '#2DD4BF',
   
-  background: '#F8FAFC',
-  surface: '#FFFFFF',
-  surfaceSubtle: '#F1F5F9',
+  expressBusBadgeBg: 'rgba(217, 119, 6, 0.2)',
+  expressBusBadgeText: '#FBBF24',
+
+  normalBusBadgeBg: 'rgba(16, 185, 129, 0.2)',
+  normalBusBadgeText: '#34D399',
   
-  textPrimary: '#0F172A',
-  textSecondary: '#475569',
-  textTertiary: '#94A3B8',
-  textInverse: '#FFFFFF',
+  // Text Hierarchy
+  textPrimary: '#F8FAFC',       // Pure Crisp White
+  textSecondary: '#94A3B8',     // Muted Blue-Grey
+  textTertiary: '#64748B',      // Dimmed Grey
+  textInverse: '#0B0F19',
   
-  userMessage: '#2563EB',
-  botMessage: '#FFFFFF',
+  userMessage: '#0284C7',
+  botMessage: '#151C2C',
   userMessageText: '#FFFFFF',
-  botMessageText: '#0F172A',
+  botMessageText: '#F8FAFC',
   
-  border: '#E2E8F0',
-  borderLight: '#F1F5F9',
+  // Borders
+  border: 'rgba(255, 255, 255, 0.08)',
+  borderActive: 'rgba(0, 242, 254, 0.3)',
   
-  shadow: '#0F172A',
+  shadow: '#000000',
 };
 
 export const TYPOGRAPHY = {
@@ -99,58 +112,66 @@ export const SHADOWS = {
   sm: {
     shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   md: {
     shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 6,
   },
 };
 
-export const POPULAR_DEPARTURES = [
+export const SIGNATURE_DEPARTURES = [
   {
     id: '1',
-    route: 'Colombo Fort → Galle',
+    route: 'Colombo Fort ➔ Galle',
     line: 'Coastal Line',
     vehicle: 'Ruhunu Kumari (Train 8058)',
     departs: '06:30 AM',
-    duration: '2h 30m',
+    status: 'ON TIME',
     type: 'train',
+    badgeBg: COLORS.coastalBadgeBg,
+    badgeColor: COLORS.coastalBadgeText,
     query: 'Show me morning train schedules to Galle',
   },
   {
     id: '2',
-    route: 'Colombo → Kandy',
+    route: 'Colombo ➔ Kandy',
     line: 'Central Expressway',
     vehicle: 'Expressway Luxury (Bus EX-1)',
     departs: '07:00 AM',
-    duration: '2h 30m',
+    status: 'FREQUENCY 30M',
     type: 'bus',
+    badgeBg: COLORS.expressBusBadgeBg,
+    badgeColor: COLORS.expressBusBadgeText,
     query: 'What bus options are available from Colombo to Kandy?',
   },
   {
     id: '3',
-    route: 'Colombo Fort → Badulla',
+    route: 'Colombo Fort ➔ Badulla',
     line: 'Main Line',
     vehicle: 'Podi Menike (Train 1005)',
     departs: '05:55 AM',
-    duration: '8h 45m',
+    status: 'ON TIME',
     type: 'train',
+    badgeBg: COLORS.mainLineBadgeBg,
+    badgeColor: COLORS.mainLineBadgeText,
     query: 'Track train schedules departing from Colombo Fort',
   },
   {
     id: '4',
-    route: 'Matara → Colombo',
+    route: 'Matara ➔ Colombo',
     line: 'Southern Line',
     vehicle: 'SLTB Luxury (Bus SLTB-01)',
     departs: '03:45 PM',
-    duration: '2h 35m',
+    status: 'DAILY',
     type: 'bus',
+    badgeBg: COLORS.normalBusBadgeBg,
+    badgeColor: COLORS.normalBusBadgeText,
     query: 'Show me bus schedules from Matara to Colombo',
   },
 ];

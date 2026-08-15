@@ -80,21 +80,21 @@ export default function ChatScreen({ navigation }: any) {
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Loading...</Text>
+        <ActivityIndicator size="small" color={COLORS.cyan} />
+        <Text style={styles.loadingText}>Connecting to Synexis AI...</Text>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
 
       <KeyboardAvoidingView 
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Simple Header */}
+        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity 
             style={styles.backBtn}
@@ -102,10 +102,13 @@ export default function ChatScreen({ navigation }: any) {
             activeOpacity={0.7}
           >
             <Text style={styles.backIcon}>‹</Text>
-            <Text style={styles.backText}>Back</Text>
+            <Text style={styles.backText}>Home</Text>
           </TouchableOpacity>
 
-          <Text style={styles.headerTitle}>Transit Assistant</Text>
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle}>Transit Assistant</Text>
+            <Text style={styles.headerSub}>RAG AI Engine • Synexis</Text>
+          </View>
 
           <TouchableOpacity onPress={handleClear} activeOpacity={0.7}>
             <Text style={styles.clearText}>Clear</Text>
@@ -133,8 +136,8 @@ export default function ChatScreen({ navigation }: any) {
         <View style={styles.messagesArea}>
           {messages.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>Ask a Question</Text>
-              <Text style={styles.emptySub}>Ask for bus or train schedules across Sri Lanka.</Text>
+              <Text style={styles.emptyTitle}>Ask Synexis AI</Text>
+              <Text style={styles.emptySub}>Query bus routes, train times, and schedules across Sri Lanka.</Text>
             </View>
           ) : (
             <FlatList
@@ -149,8 +152,8 @@ export default function ChatScreen({ navigation }: any) {
 
           {isSending && (
             <View style={styles.typingRow}>
-              <ActivityIndicator size="small" color={COLORS.primary} />
-              <Text style={styles.typingText}>Searching schedules...</Text>
+              <ActivityIndicator size="small" color={COLORS.cyan} />
+              <Text style={styles.typingText}>Retrieving transit schedules...</Text>
             </View>
           )}
         </View>
@@ -186,19 +189,26 @@ const styles = StyleSheet.create({
   },
   backIcon: {
     fontSize: 24,
-    color: COLORS.primary,
+    color: COLORS.cyan,
     fontWeight: 'bold',
     marginTop: -2,
   },
   backText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.primary,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.cyan,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  headerTitleContainer: {
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: TYPOGRAPHY.fontSize.base,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
+  },
+  headerSub: {
+    fontSize: 10,
+    color: COLORS.textSecondary,
   },
   clearText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
@@ -208,7 +218,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     paddingVertical: SPACING.xs,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderLight,
+    borderBottomColor: COLORS.border,
   },
   chipsScroll: {
     paddingHorizontal: SPACING.md,

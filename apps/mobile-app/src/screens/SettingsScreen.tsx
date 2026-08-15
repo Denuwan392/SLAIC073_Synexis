@@ -9,9 +9,9 @@ export default function SettingsScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
       
-      {/* Simple Header */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backBtn}
@@ -23,24 +23,24 @@ export default function SettingsScreen({ navigation }: any) {
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Settings</Text>
-        <View style={{ width: 50 }} />
+        <View style={{ width: 60 }} />
       </View>
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         
         {/* Settings Group */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
+          <Text style={styles.sectionTitle}>PREFERENCES</Text>
 
           <View style={styles.card}>
             <View style={styles.row}>
               <View style={styles.rowInfo}>
-                <Text style={styles.rowTitle}>Notifications</Text>
-                <Text style={styles.rowSub}>Schedule updates & alerts</Text>
+                <Text style={styles.rowTitle}>Notifications & Alerts</Text>
+                <Text style={styles.rowSub}>Schedule updates & departure alerts</Text>
               </View>
               <Switch
-                trackColor={{ false: COLORS.border, true: COLORS.primaryLight }}
-                thumbColor={notifications ? COLORS.primary : '#9CA3AF'}
+                trackColor={{ false: COLORS.surfaceSubtle, true: 'rgba(0, 242, 254, 0.4)' }}
+                thumbColor={notifications ? COLORS.cyan : '#64748B'}
                 onValueChange={setNotifications}
                 value={notifications}
               />
@@ -50,12 +50,12 @@ export default function SettingsScreen({ navigation }: any) {
 
             <View style={styles.row}>
               <View style={styles.rowInfo}>
-                <Text style={styles.rowTitle}>Auto Translate</Text>
+                <Text style={styles.rowTitle}>Auto Translate AI</Text>
                 <Text style={styles.rowSub}>Support Sinhala & Tamil queries</Text>
               </View>
               <Switch
-                trackColor={{ false: COLORS.border, true: COLORS.primaryLight }}
-                thumbColor={autoTranslate ? COLORS.primary : '#9CA3AF'}
+                trackColor={{ false: COLORS.surfaceSubtle, true: 'rgba(0, 242, 254, 0.4)' }}
+                thumbColor={autoTranslate ? COLORS.cyan : '#64748B'}
                 onValueChange={setAutoTranslate}
                 value={autoTranslate}
               />
@@ -65,7 +65,7 @@ export default function SettingsScreen({ navigation }: any) {
 
         {/* Language Selection */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Language</Text>
+          <Text style={styles.sectionTitle}>LANGUAGE SELECTION</Text>
 
           <View style={styles.card}>
             {SUPPORTED_LANGUAGES.map((lang, index) => (
@@ -87,15 +87,17 @@ export default function SettingsScreen({ navigation }: any) {
           </View>
         </View>
 
-        {/* About Info */}
+        {/* System & Architecture Info */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
+          <Text style={styles.sectionTitle}>SYSTEM SPECIFICATIONS</Text>
           <View style={styles.card}>
             <View style={styles.aboutRow}>
               <Text style={styles.appName}>Synexis Mobile</Text>
-              <Text style={styles.appVersion}>v1.0.0</Text>
+              <Text style={styles.appVersion}>v1.0.0 Production</Text>
             </View>
-            <Text style={styles.aboutDesc}>Smart Transit Assistant for Sri Lanka buses & trains.</Text>
+            <Text style={styles.aboutDesc}>
+              Powered by LangGraph Agent RAG & ChromaDB Vector Engine.
+            </Text>
           </View>
         </View>
 
@@ -126,14 +128,14 @@ const styles = StyleSheet.create({
   },
   backIcon: {
     fontSize: 24,
-    color: COLORS.primary,
+    color: COLORS.cyan,
     fontWeight: 'bold',
     marginTop: -2,
   },
   backText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.primary,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.cyan,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
   },
   headerTitle: {
     fontSize: TYPOGRAPHY.fontSize.base,
@@ -149,11 +151,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   sectionTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontSize: 10,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
     marginBottom: SPACING.xs,
     marginLeft: 2,
   },
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.borderLight,
+    backgroundColor: COLORS.border,
     marginLeft: SPACING.md,
   },
   langRow: {
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
   checkMark: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: 'bold',
-    color: COLORS.primary,
+    color: COLORS.cyan,
   },
   aboutRow: {
     flexDirection: 'row',
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
   },
   appVersion: {
     fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textTertiary,
+    color: COLORS.cyan,
   },
   aboutDesc: {
     fontSize: TYPOGRAPHY.fontSize.xs,
