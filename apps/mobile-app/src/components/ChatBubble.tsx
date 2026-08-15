@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Message } from '../types';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../utils/constants';
 
@@ -18,39 +17,17 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
 
   return (
     <View style={[styles.container, isUser ? styles.userContainer : styles.botContainer]}>
-      {isUser ? (
-        <LinearGradient
-          colors={[COLORS.primary, COLORS.primaryDark]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.bubble, styles.userBubble]}
-        >
-          <Text style={[styles.messageText, styles.userText]}>
-            {message.content}
-          </Text>
-          <Text style={[styles.timestamp, styles.userTimestamp]}>
-            {formattedTime}
-          </Text>
-        </LinearGradient>
-      ) : (
-        <View style={[styles.bubble, styles.botBubble]}>
-          <View style={styles.botHeader}>
-            <View style={styles.botAvatar}>
-              <Text style={styles.botIcon}>🤖</Text>
-            </View>
-            <View style={styles.botMeta}>
-              <Text style={styles.botName}>Synexis Assistant</Text>
-              <Text style={styles.botBadge}>AI Verified</Text>
-            </View>
-          </View>
-          <Text style={[styles.messageText, styles.botText]}>
-            {message.content}
-          </Text>
-          <Text style={[styles.timestamp, styles.botTimestamp]}>
-            {formattedTime}
-          </Text>
-        </View>
-      )}
+      <View style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}>
+        {!isUser && (
+          <Text style={styles.botTitle}>Synexis AI</Text>
+        )}
+        <Text style={[styles.messageText, isUser ? styles.userText : styles.botText]}>
+          {message.content}
+        </Text>
+        <Text style={[styles.timestamp, isUser ? styles.userTimestamp : styles.botTimestamp]}>
+          {formattedTime}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -67,80 +44,44 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   bubble: {
-    maxWidth: '84%',
-    borderRadius: RADIUS.lg,
+    maxWidth: '85%',
+    borderRadius: RADIUS.md,
     padding: SPACING.md,
   },
   userBubble: {
-    borderBottomRightRadius: SPACING.xs,
+    backgroundColor: COLORS.primary,
+    borderBottomRightRadius: 2,
     ...SHADOWS.sm,
   },
   botBubble: {
     backgroundColor: COLORS.surface,
-    borderBottomLeftRadius: SPACING.xs,
-    ...SHADOWS.md,
+    borderBottomLeftRadius: 2,
     borderWidth: 1,
     borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
-  botHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.xs,
-    paddingBottom: SPACING.xs,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderLight,
-  },
-  botAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: RADIUS.full,
-    backgroundColor: COLORS.primaryGlow,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.xs,
-  },
-  botIcon: {
-    fontSize: 16,
-  },
-  botMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flex: 1,
-  },
-  botName: {
+  botTitle: {
     fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.primary,
-  },
-  botBadge: {
-    fontSize: 10,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.secondary,
-    backgroundColor: COLORS.secondary + '15',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: RADIUS.xs,
+    color: COLORS.primary,
+    marginBottom: 4,
   },
   messageText: {
     fontSize: TYPOGRAPHY.fontSize.base,
     lineHeight: TYPOGRAPHY.lineHeight.normal * TYPOGRAPHY.fontSize.base,
   },
   userText: {
-    color: COLORS.userMessageText,
-    fontWeight: TYPOGRAPHY.fontWeight.regular,
+    color: COLORS.textInverse,
   },
   botText: {
-    color: COLORS.botMessageText,
-    fontWeight: TYPOGRAPHY.fontWeight.regular,
+    color: COLORS.textPrimary,
   },
   timestamp: {
     fontSize: 11,
-    marginTop: SPACING.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    marginTop: 6,
   },
   userTimestamp: {
-    color: 'rgba(255, 255, 255, 0.75)',
+    color: 'rgba(255, 255, 255, 0.7)',
     alignSelf: 'flex-end',
   },
   botTimestamp: {

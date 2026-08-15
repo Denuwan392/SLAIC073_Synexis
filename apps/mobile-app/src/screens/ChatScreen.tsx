@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, StatusBar, KeyboardAvoidingView, Platform, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import ChatBubble from '../components/ChatBubble';
 import InputField from '../components/InputField';
 import { fetchMessages, sendMessage } from '../services/api';
 import { Message } from '../types';
-import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS, QUICK_PROMPTS } from '../utils/constants';
+import { COLORS, TYPOGRAPHY, SPACING, RADIUS, QUICK_PROMPTS } from '../utils/constants';
 
 export default function ChatScreen({ navigation }: any) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -37,7 +36,6 @@ export default function ChatScreen({ navigation }: any) {
       timestamp: new Date()
     };
 
-    // Prepend user message so inverted FlatList shows it at the bottom
     setMessages((prev) => [userMsg, ...prev]);
     setIsSending(true);
 
@@ -61,7 +59,7 @@ export default function ChatScreen({ navigation }: any) {
       console.error('Error sending message:', error);
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
-        content: '⚠️ Network Error: Unable to reach transit service. Please check your backend connection.',
+        content: 'Unable to connect to server. Please try again.',
         sender: {
           id: 'bot-1',
           name: 'Assistant',
@@ -75,32 +73,31 @@ export default function ChatScreen({ navigation }: any) {
     }
   };
 
-  const handleClearChat = () => {
+  const handleClear = () => {
     setMessages([]);
   };
 
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Initializing Synexis AI...</Text>
+        <ActivityIndicator size="small" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Loading...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeContainer}>
+    <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
 
       <KeyboardAvoidingView 
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        {/* Custom Header Bar */}
-        <View style={styles.headerBar}>
+        {/* Simple Header */}
+        <View style={styles.header}>
           <TouchableOpacity 
-            style={styles.backButton}
+            style={styles.backBtn}
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}
           >
@@ -108,30 +105,20 @@ export default function ChatScreen({ navigation }: any) {
             <Text style={styles.backText}>Back</Text>
           </TouchableOpacity>
 
-          <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle}>Synexis Assistant</Text>
-            <View style={styles.onlineBadge}>
-              <View style={styles.onlineDot} />
-              <Text style={styles.onlineText}>Gemini 2.5 AI</Text>
-            </View>
-          </View>
+          <Text style={styles.headerTitle}>Transit Assistant</Text>
 
-          <TouchableOpacity 
-            style={styles.clearButton}
-            onPress={handleClearChat}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity onPress={handleClear} activeOpacity={0.7}>
             <Text style={styles.clearText}>Clear</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Suggestion Chips Header */}
-        <View style={styles.chipsContainer}>
+        {/* Quick Suggestion Chips */}
+        <View style={styles.chipsRow}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsScroll}>
             {QUICK_PROMPTS.map((prompt) => (
               <TouchableOpacity
                 key={prompt.id}
-                style={styles.chipButton}
+                style={styles.chip}
                 onPress={() => handleSend(prompt.query)}
                 disabled={isSending}
                 activeOpacity={0.7}
@@ -142,27 +129,12 @@ export default function ChatScreen({ navigation }: any) {
           </ScrollView>
         </View>
 
-        {/* Chat Messages Area */}
-        <View style={styles.messagesContainer}>
+        {/* Messages List */}
+        <View style={styles.messagesArea}>
           {messages.length === 0 ? (
             <View style={styles.emptyState}>
-              <View style={styles.emptyIconCircle}>
-                <Text style={styles.emptyEmoji}>🤖</Text>
-              </View>
-              <Text style={styles.emptyTitle}>Ask Anything About Transit</Text>
-              <Text style={styles.emptySubtitle}>
-                Get instant bus timetables, express train schedules, and live route tracking across Sri Lanka.
-              </Text>
-              
-              <View style={styles.sampleBox}>
-                <Text style={styles.sampleHeader}>TRY ASKING:</Text>
-                <TouchableOpacity onPress={() => handleSend('Bus schedules from Colombo to Kandy')}>
-                  <Text style={styles.sampleItem}>• "Bus schedules from Colombo to Kandy"</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleSend('Morning express trains to Galle')}>
-                  <Text style={styles.sampleItem}>• "Morning express trains to Galle"</Text>
-                </TouchableOpacity>
-              </View>
+              <Text style={styles.emptyTitle}>Ask a Question</Text>
+              <Text style={styles.emptySub}>Ask for bus or train schedules across Sri Lanka.</Text>
             </View>
           ) : (
             <FlatList
@@ -175,16 +147,15 @@ export default function ChatScreen({ navigation }: any) {
             />
           )}
 
-          {/* Thinking Indicator */}
           {isSending && (
-            <View style={styles.typingIndicator}>
+            <View style={styles.typingRow}>
               <ActivityIndicator size="small" color={COLORS.primary} />
-              <Text style={styles.typingText}>Searching transit databases...</Text>
+              <Text style={styles.typingText}>Searching schedules...</Text>
             </View>
           )}
         </View>
 
-        {/* Floating Input Bar */}
+        {/* Input Bar */}
         <InputField onSend={handleSend} />
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -192,76 +163,50 @@ export default function ChatScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  safeContainer: {
+  safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
   container: {
     flex: 1,
   },
-  headerBar: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+    paddingVertical: SPACING.sm + 2,
     backgroundColor: COLORS.surface,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
-    ...SHADOWS.sm,
   },
-  backButton: {
+  backBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: SPACING.xs,
   },
   backIcon: {
-    fontSize: 28,
+    fontSize: 24,
     color: COLORS.primary,
     fontWeight: 'bold',
     marginTop: -2,
   },
   backText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
+    fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.primary,
     fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  headerTitleContainer: {
-    alignItems: 'center',
   },
   headerTitle: {
     fontSize: TYPOGRAPHY.fontSize.base,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
   },
-  onlineBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 2,
-  },
-  onlineDot: {
-    width: 6,
-    height: 6,
-    borderRadius: RADIUS.full,
-    backgroundColor: COLORS.secondary,
-    marginRight: 4,
-  },
-  onlineText: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  clearButton: {
-    paddingHorizontal: SPACING.xs,
-  },
   clearText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textTertiary,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
   },
-  chipsContainer: {
+  chipsRow: {
     backgroundColor: COLORS.surface,
-    paddingVertical: SPACING.xs + 2,
+    paddingVertical: SPACING.xs,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.borderLight,
   },
@@ -269,25 +214,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     gap: SPACING.xs,
   },
-  chipButton: {
+  chip: {
     backgroundColor: COLORS.surfaceSubtle,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 6,
     borderRadius: RADIUS.full,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
   chipText: {
     fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textSecondary,
     fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textPrimary,
   },
-  messagesContainer: {
+  messagesArea: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
   messagesList: {
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
   emptyState: {
     flex: 1,
@@ -295,72 +240,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SPACING.xl,
   },
-  emptyIconCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: RADIUS.full,
-    backgroundColor: COLORS.primaryGlow,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  emptyEmoji: {
-    fontSize: 34,
-  },
   emptyTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
-    textAlign: 'center',
+    marginBottom: 4,
   },
-  emptySubtitle: {
+  emptySub: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textSecondary,
     textAlign: 'center',
-    lineHeight: TYPOGRAPHY.lineHeight.normal * TYPOGRAPHY.fontSize.sm,
-    marginBottom: SPACING.lg,
   },
-  sampleBox: {
-    width: '100%',
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.sm,
-  },
-  sampleHeader: {
-    fontSize: 10,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.primary,
-    letterSpacing: 0.8,
-    marginBottom: SPACING.xs,
-  },
-  sampleItem: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textSecondary,
-    marginVertical: 4,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  typingIndicator: {
+  typingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: COLORS.surface,
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs + 2,
-    borderRadius: RADIUS.full,
-    marginHorizontal: SPACING.md,
-    marginVertical: SPACING.xs,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    paddingVertical: SPACING.xs,
   },
   typingText: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textSecondary,
     marginLeft: SPACING.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
   loadingContainer: {
     flex: 1,
@@ -369,9 +269,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   loadingText: {
-    marginTop: SPACING.md,
+    marginTop: SPACING.xs,
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textSecondary,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
 });
