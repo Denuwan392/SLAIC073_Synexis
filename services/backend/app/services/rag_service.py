@@ -12,7 +12,8 @@ def get_genai_client():
     return None
 
 def retrieve_routes(query: str, top_k: int = 5) -> List[str]:
-    """Perform vector similarity search against ChromaDB."""
+    """Perform vector similarity search against ChromaDB with keyword search fallback."""
+    passages = []
     try:
         embedding_fn.document_mode = False
         query_embedding = embedding_fn([query])[0]
@@ -21,11 +22,24 @@ def retrieve_routes(query: str, top_k: int = 5) -> List[str]:
             n_results=top_k
         )
         if results and results.get("documents") and len(results["documents"]) > 0:
-            return results["documents"][0]
-        return []
+            passages = results["documents"][0]
     except Exception as e:
         print(f"Error querying ChromaDB: {e}")
-        return []
+
+    # Fallback to direct document text matching if vector passages are empty
+    if not passages:
+        from app.data.documents import documents
+        query_words = [w.lower() for w in query.split() if len(w) > 2]
+        matched = []
+        for doc in documents:
+            doc_lower = doc.lower()
+            if any(w in doc_lower for w in query_words):
+                matched.append(doc[:300])
+                if len(matched) >= top_k:
+                    break
+        passages = matched
+
+    return passages
 
 def classify_query(query: str) -> Dict[str, Any]:
     """Classify language and transit intent using Gemini."""
@@ -82,14 +96,11 @@ Use ONLY the passages below to answer the user question.
 
 RULES:
 - Answer questions about BOTH buses AND trains based on the provided passages.
-- If user asks for "buses" without specifying type → list ALL buses (both Luxury and Normal).
-- If user asks for "trains" → show train schedules with train names/numbers.
-- For trains: Show train name/number, departure, arrival, and stops.
-- For buses: Show bus number, service type, departure, arrival.
-- If no buses/trains match → say: "No luxury/normal buses or trains found matching this route."
-- ALWAYS format output clearly with headings, bullet points, and emojis (🚌, 🚆, ⏱️).
-- If listing many items (> 10), group by service type and show top 5-10 per group.
-- Include travel time if available.
+- List ALL matching bus services (Express, Luxury, Normal, Intercity, etc.) and trains found in the passages.
+- For trains: Show train name/number, departure, arrival, and stops if available.
+- For buses: Show bus number, service type, departure, and arrival times.
+- Format output clearly with headings, bullet points, and emojis (🚌, 🚆, ⏱️).
+- Include travel time and service frequency if available in passages.
 
 QUESTION: {query}
 """
@@ -105,7 +116,10 @@ QUESTION: {query}
         return response.text
     except Exception as e:
         print(f"Answer generation error: {e}")
-        return f"Error generating answer: {str(e)}"
+        if passages:
+            formatted = "\n".join([f"• {p.strip()}" for p in passages[:6]])
+            return f"🚌 **Sri Lanka Transit Schedule Information:**\n\n{formatted}"
+        return "Sorry, transit service is temporarily busy. Please try again in a moment."
 
 def translate_response(text: str, target_lang: str) -> str:
     """Translate answer to target language (si/ta)."""

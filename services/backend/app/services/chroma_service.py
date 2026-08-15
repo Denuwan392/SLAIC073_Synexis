@@ -62,21 +62,27 @@ def parse_route_document(doc_text: str) -> List[Dict[str, Any]]:
     route_no, start_dest, via = "", "", ""
 
     for line in lines:
-        if line.startswith("ROUTE:"):
-            parts = line.split(" - ")
-            route_no = parts[0].replace("ROUTE:", "").strip()
+        line_clean = line.strip()
+        if not line_clean:
+            continue
+            
+        line_upper = line_clean.upper()
+        if line_upper.startswith("ROUTE:") and " - " in line_clean:
+            parts = line_clean.split(" - ")
+            route_no = parts[0].split(":", 1)[1].strip()
             if len(parts) > 1:
                 start_dest = parts[1].strip()
-        elif line.startswith("VIA:"):
-            via = line.replace("VIA:", "").strip()
-        elif "Departs:" in line:
+        elif line_upper.startswith("VIA:"):
+            via = line_clean.split(":", 1)[1].strip()
+        elif "DEPARTS:" in line_upper or "ROUTE:" in line_upper or "BUS:" in line_upper or "TRAIN:" in line_upper:
             meta = {
                 "route_no": route_no,
                 "start_dest": start_dest,
                 "via": via,
-                "full_text": line,
+                "full_text": line_clean,
             }
-            chunks.append({"text": f"{route_no} {start_dest} via {via} | {line}", "metadata": meta})
+            prefix = f"{route_no} {start_dest} via {via} | ".strip() if route_no else ""
+            chunks.append({"text": f"{prefix}{line_clean}", "metadata": meta})
     return chunks
 
 # Initialize persistent ChromaDB client
