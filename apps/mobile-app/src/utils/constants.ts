@@ -1,138 +1,148 @@
-export const API_BASE_URL = 'http://192.168.0.101:8000'; // Current Mac LAN IP for mobile testing
+export const API_BASE_URL = 'http://localhost:8000'; // Local development host
 
-export const DEFAULT_LANGUAGE = 'en'; // Default language for the app
+export const DEFAULT_LANGUAGE = 'en';
 
-export const SUPPORTED_LANGUAGES = ['en', 'si', 'ta']; // Supported languages: English, Sinhala, Tamil
+export const SUPPORTED_LANGUAGES = [
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'si', name: 'සිංහල', flag: '🇱🇰' },
+  { code: 'ta', name: 'தமிழ்', flag: '🇱🇰' }
+];
 
-export const CHATBOT_NAME = 'Smart Transit Assistant'; // Name of the chatbot
-
-export const MAX_MESSAGE_LENGTH = 500; // Maximum length for user messages
-
-export const TIMEOUT_DURATION = 5000; // Timeout duration for API requests in milliseconds
+export const CHATBOT_NAME = 'Synexis Transit AI';
+export const MAX_MESSAGE_LENGTH = 500;
+export const TIMEOUT_DURATION = 8000;
 
 export const ERROR_MESSAGES = {
-    NETWORK_ERROR: 'Network error. Please try again later.',
-    INVALID_INPUT: 'Invalid input. Please check your message.',
-    API_ERROR: 'An error occurred while communicating with the server.',
-}; // Common error messages used in the app
+  NETWORK_ERROR: 'Network issue detected. Please check connection.',
+  INVALID_INPUT: 'Invalid query input. Please try again.',
+  API_ERROR: 'Unable to process transit request.',
+};
 
-// Professional Color Palette
+// Premium Electric Indigo & Slate Palette
 export const COLORS = {
-    // Primary Colors
-    primary: '#2563EB', // Modern blue
-    primaryDark: '#1E40AF',
-    primaryLight: '#60A5FA',
-    
-    // Secondary Colors
-    secondary: '#10B981', // Success green
-    secondaryDark: '#059669',
-    secondaryLight: '#34D399',
-    
-    // Accent Colors
-    accent: '#8B5CF6', // Purple
-    accentLight: '#A78BFA',
-    
-    // Neutral Colors
-    background: '#F8FAFC',
-    backgroundDark: '#F1F5F9',
-    surface: '#FFFFFF',
-    
-    // Text Colors
-    textPrimary: '#1E293B',
-    textSecondary: '#64748B',
-    textTertiary: '#94A3B8',
-    textInverse: '#FFFFFF',
-    
-    // Message Colors
-    userMessage: '#2563EB',
-    botMessage: '#FFFFFF',
-    userMessageText: '#FFFFFF',
-    botMessageText: '#1E293B',
-    
-    // Status Colors
-    success: '#10B981',
-    warning: '#F59E0B',
-    error: '#EF4444',
-    info: '#3B82F6',
-    
-    // Border Colors
-    border: '#E2E8F0',
-    borderLight: '#F1F5F9',
-    
-    // Shadow
-    shadow: '#000000',
+  // Primary Palette
+  primary: '#4F46E5',        // Electric Indigo
+  primaryDark: '#3730A3',    // Deep Indigo
+  primaryLight: '#818CF8',   // Soft Violet Tint
+  primaryGlow: '#6366F120',  // Glass Glow
+  
+  // Secondary & Accents
+  secondary: '#10B981',      // Emerald Green (Live Status)
+  secondaryDark: '#059669',
+  secondaryLight: '#34D399',
+  
+  accent: '#8B5CF6',         // Modern Purple
+  accentLight: '#C4B5FD',
+  
+  // Backgrounds & Surfaces
+  background: '#F8FAFC',     // Modern Slate White
+  backgroundDark: '#0F172A', // Slate 900
+  surface: '#FFFFFF',        // Clean Card Surface
+  surfaceSubtle: '#F1F5F9',  // Subtle Input Surface
+  
+  // Text Colors
+  textPrimary: '#0F172A',    // Slate 900
+  textSecondary: '#475569',  // Slate 600
+  textTertiary: '#94A3B8',   // Slate 400
+  textInverse: '#FFFFFF',
+  
+  // Messages & Bubbles
+  userMessage: '#4F46E5',
+  botMessage: '#FFFFFF',
+  userMessageText: '#FFFFFF',
+  botMessageText: '#0F172A',
+  
+  // Status Colors
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
+  
+  // Borders & Dividers
+  border: '#E2E8F0',
+  borderLight: '#F1F5F9',
+  glassBorder: 'rgba(255, 255, 255, 0.25)',
+  
+  // Shadow
+  shadow: '#0F172A',
 };
 
-// Typography
+// Typography Scale
 export const TYPOGRAPHY = {
-    // Font Sizes
-    fontSize: {
-        xs: 12,
-        sm: 14,
-        base: 16,
-        lg: 18,
-        xl: 20,
-        '2xl': 24,
-        '3xl': 30,
-        '4xl': 36,
-    },
-    
-    // Font Weights
-    fontWeight: {
-        regular: '400' as const,
-        medium: '500' as const,
-        semibold: '600' as const,
-        bold: '700' as const,
-    },
-    
-    // Line Heights
-    lineHeight: {
-        tight: 1.2,
-        normal: 1.5,
-        relaxed: 1.75,
-    },
+  fontSize: {
+    xs: 12,
+    sm: 13,
+    base: 15,
+    lg: 17,
+    xl: 20,
+    '2xl': 24,
+    '3xl': 28,
+    '4xl': 34,
+  },
+  
+  fontWeight: {
+    regular: '400' as const,
+    medium: '500' as const,
+    semibold: '600' as const,
+    bold: '700' as const,
+  },
+  
+  lineHeight: {
+    tight: 1.2,
+    normal: 1.45,
+    relaxed: 1.65,
+  },
 };
 
-// Spacing
+// Spacing scale
 export const SPACING = {
-    xs: 4,
-    sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
-    '2xl': 48,
+  xs: 6,
+  sm: 10,
+  md: 16,
+  lg: 22,
+  xl: 30,
+  '2xl': 44,
 };
 
-// Border Radius
+// Border Radii
 export const RADIUS = {
-    sm: 8,
-    md: 12,
-    lg: 16,
-    xl: 24,
-    full: 9999,
+  xs: 6,
+  sm: 10,
+  md: 14,
+  lg: 20,
+  xl: 26,
+  full: 9999,
 };
 
-// Shadows
+// Elevation & Drop Shadows
 export const SHADOWS = {
-    sm: {
-        shadowColor: COLORS.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    md: {
-        shadowColor: COLORS.shadow,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    lg: {
-        shadowColor: COLORS.shadow,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.15,
-        shadowRadius: 16,
-        elevation: 8,
-    },
+  sm: {
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  md: {
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  lg: {
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
+  },
 };
+
+// Quick Travel Suggestion Prompts
+export const QUICK_PROMPTS = [
+  { id: '1', title: '🚌 Colombo to Kandy', query: 'What bus options are available from Colombo to Kandy?' },
+  { id: '2', title: '🚆 Galle Express Train', query: 'Show me morning train schedules to Galle' },
+  { id: '3', title: '📍 Fort Live Status', query: 'Track train schedules departing from Colombo Fort' },
+  { id: '4', title: '✈️ Katunayake Express', query: 'Buses to Bandaranayake Airport Katunayake' },
+];
