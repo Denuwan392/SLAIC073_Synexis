@@ -19,9 +19,9 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         self.document_mode = True
 
     def __call__(self, input: Documents) -> Embeddings:
+        dim = 3072
         if not self.client:
-            # Fallback zero-vector if key is unconfigured
-            return [[0.0] * 768 for _ in input]
+            return [[0.0] * dim for _ in input]
             
         batch_size = 50
         all_embeddings = []
@@ -29,19 +29,29 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         for i in range(0, len(input), batch_size):
             batch = input[i:i + batch_size]
             task = "retrieval_document" if self.document_mode else "retrieval_query"
-            try:
-                response = self.client.models.embed_content(
-                    model=settings.EMBEDDING_MODEL,
-                    contents=batch,
-                    config=types.EmbedContentConfig(task_type=task),
-                )
-                batch_embeddings = [e.values for e in response.embeddings]
-                all_embeddings.extend(batch_embeddings)
-            except Exception as e:
-                print(f"Error embedding batch {i} to {i + len(batch)}: {e}")
+            success = False
+            
+            for attempt in range(3):
+                try:
+                    response = self.client.models.embed_content(
+                        model=settings.EMBEDDING_MODEL,
+                        contents=batch,
+                        config=types.EmbedContentConfig(task_type=task),
+                    )
+                    batch_embeddings = [e.values for e in response.embeddings]
+                    all_embeddings.extend(batch_embeddings)
+                    success = True
+                    break
+                except Exception as e:
+                    if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                        time.sleep(2 * (attempt + 1))
+                    else:
+                        print(f"Error embedding batch {i} to {i + len(batch)}: {e}")
+                        break
+            
+            if not success:
                 for _ in batch:
-                    all_embeddings.append([0.0] * 768)
-                time.sleep(1)
+                    all_embeddings.append([0.0] * dim)
 
         return all_embeddings
 
@@ -52,21 +62,27 @@ def parse_route_document(doc_text: str) -> List[Dict[str, Any]]:
     route_no, start_dest, via = "", "", ""
 
     for line in lines:
-        if line.startswith("ROUTE:"):
-            parts = line.split(" - ")
-            route_no = parts[0].replace("ROUTE:", "").strip()
+        line_clean = line.strip()
+        if not line_clean:
+            continue
+            
+        line_upper = line_clean.upper()
+        if line_upper.startswith("ROUTE:") and " - " in line_clean:
+            parts = line_clean.split(" - ")
+            route_no = parts[0].split(":", 1)[1].strip()
             if len(parts) > 1:
                 start_dest = parts[1].strip()
-        elif line.startswith("VIA:"):
-            via = line.replace("VIA:", "").strip()
-        elif "Departs:" in line:
+        elif line_upper.startswith("VIA:"):
+            via = line_clean.split(":", 1)[1].strip()
+        elif "DEPARTS:" in line_upper or "ROUTE:" in line_upper or "BUS:" in line_upper or "TRAIN:" in line_upper:
             meta = {
                 "route_no": route_no,
                 "start_dest": start_dest,
                 "via": via,
-                "full_text": line,
+                "full_text": line_clean,
             }
-            chunks.append({"text": f"{route_no} {start_dest} via {via} | {line}", "metadata": meta})
+            prefix = f"{route_no} {start_dest} via {via} | ".strip() if route_no else ""
+            chunks.append({"text": f"{prefix}{line_clean}", "metadata": meta})
     return chunks
 
 # Initialize persistent ChromaDB client
@@ -80,11 +96,21 @@ db = chroma_client.get_or_create_collection(
 
 def init_chroma_db():
     """Build or load ChromaDB. Skips re-indexing if vector DB is already populated."""
+    global db
     try:
-        current_count = db.count()
+        try:
+            current_count = db.count()
+        except Exception:
+            chroma_client.delete_collection("sri_lanka_transport")
+            db = chroma_client.get_or_create_collection(
+                name="sri_lanka_transport",
+                embedding_function=embedding_fn
+            )
+            current_count = 0
+
         print(f"Chroma DB status: {current_count} documents indexed.")
         if current_count == 0:
-            print("Database is empty. Building Chroma DB from documents.py...")
+            print("Building Chroma DB from documents.py...")
             all_chunks = []
             for doc in documents:
                 chunks = parse_route_document(doc)
@@ -107,6 +133,6 @@ def init_chroma_db():
             else:
                 print("No document chunks parsed.")
         else:
-            print("Existing Chroma DB loaded cleanly (skipped rebuild).")
+            print("Existing Chroma DB loaded cleanly.")
     except Exception as e:
         print(f"Warning during Chroma DB initialization: {e}")

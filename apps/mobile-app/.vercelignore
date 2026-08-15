@@ -1,0 +1,11 @@
+node_modules/
+.expo/
+.expo-shared/
+__pycache__/
+*.pyc
+.DS_Store
+.git/
+*.log
+.env.local
+android/
+ios/
