@@ -8,7 +8,7 @@ interface LineDetail {
   route: string;
   departures: string[];
   stops: string[];
-  fares: string;
+  serviceClasses: string;
 }
 
 const LINE_DETAILS: Record<string, LineDetail> = {
@@ -18,7 +18,7 @@ const LINE_DETAILS: Record<string, LineDetail> = {
     route: 'Colombo Fort ↔ Galle ↔ Matara',
     departures: ['06:30 AM (Ruhunu Kumari)', '07:00 AM (Galle Express)', '10:30 AM (Dakshina)', '04:30 PM (Sagarika)', '05:30 PM (Samudra Devi)'],
     stops: ['Colombo Fort', 'Panadura', 'Kalutara South', 'Aluthgama', 'Ambalangoda', 'Hikkaduwa', 'Galle', 'Weligama', 'Matara'],
-    fares: '3rd Class: LKR 240 | 2nd Class: LKR 500 | 1st Class: LKR 1,200',
+    serviceClasses: '3rd Class Economy | 2nd Class Reserved | 1st Class AC',
   },
   mainline: {
     title: 'Main Line Railway',
@@ -26,7 +26,7 @@ const LINE_DETAILS: Record<string, LineDetail> = {
     route: 'Colombo Fort ↔ Kandy ↔ Badulla',
     departures: ['05:30 AM (Ella Odyssey)', '05:55 AM (Podi Menike)', '08:30 AM (Udarata Menike)', '12:40 PM (Senkadagala)', '05:45 PM (Kandy Express)'],
     stops: ['Colombo Fort', 'Ragama', 'Gampaha', 'Polgahawela', 'Rambukkana', 'Peradeniya', 'Kandy', 'Nanu Oya', 'Ella', 'Badulla'],
-    fares: '3rd Class: LKR 300 | 2nd Class: LKR 600 | Luxury Tourist: LKR 2,500',
+    serviceClasses: '3rd Class Economy | 2nd Class Reserved | Luxury Tourist',
   },
   southern: {
     title: 'Southern Expressway AC',
@@ -34,7 +34,7 @@ const LINE_DETAILS: Record<string, LineDetail> = {
     route: 'Colombo (Makumbura) ↔ Galle ↔ Matara',
     departures: ['Departures every 20 minutes from 05:00 AM to 09:00 PM daily.'],
     stops: ['Makumbura Multimodal Center', 'Galle Central Bus Stand', 'Matara Highway Station'],
-    fares: 'Colombo ➔ Galle: LKR 950 | Colombo ➔ Matara: LKR 1,250',
+    serviceClasses: 'Point-to-Point Super Luxury AC Expressway Service',
   },
   central: {
     title: 'Central Expressway AC',
@@ -42,7 +42,7 @@ const LINE_DETAILS: Record<string, LineDetail> = {
     route: 'Colombo (Pettah) ↔ Kandy (Goods Shed)',
     departures: ['Departures every 30 minutes from 05:00 AM to 08:30 PM daily.'],
     stops: ['Pettah Central Terminal', 'Mirigama Interchange', 'Kurunegala Interchange', 'Kandy Goods Shed'],
-    fares: 'Expressway AC Luxury: LKR 1,100 | SLTB Normal: LKR 480',
+    serviceClasses: 'Expressway AC Luxury | SLTB Intercity Bus Service',
   },
 };
 
@@ -177,23 +177,23 @@ export default function HomeScreen({ navigation }: any) {
           ))}
         </View>
 
-        {/* Fares & Ticket Reference Guide */}
+        {/* Transit Network Hubs Guide */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>TRANSIT FARE REFERENCE</Text>
+          <Text style={styles.sectionTitle}>MAJOR TRANSIT HUBS</Text>
           <View style={styles.fareCard}>
             <View style={styles.fareRow}>
-              <Text style={styles.fareType}>🚆 Railway Fares</Text>
-              <Text style={styles.fareAmount}>LKR 120 - LKR 1,500</Text>
+              <Text style={styles.fareType}>🚆 Main Railway Hubs</Text>
+              <Text style={styles.fareAmount}>Central Terminal</Text>
             </View>
-            <Text style={styles.fareDetail}>3rd Class Economy, 2nd Class Reserved, 1st Class AC</Text>
+            <Text style={styles.fareDetail}>Colombo Fort, Maradana, Kandy, Galle, Jaffna, Anuradhapura</Text>
 
             <View style={styles.fareDivider} />
 
             <View style={styles.fareRow}>
-              <Text style={styles.fareType}>🚌 Expressway AC Bus</Text>
-              <Text style={styles.fareAmount}>LKR 950 - LKR 1,450</Text>
+              <Text style={styles.fareType}>🚌 Main Expressway Hubs</Text>
+              <Text style={styles.fareAmount}>Highway Multimodal</Text>
             </View>
-            <Text style={styles.fareDetail}>Point-to-point highway express services</Text>
+            <Text style={styles.fareDetail}>Makumbura MMC, Pettah Central Stand, Kandy Goods Shed</Text>
           </View>
         </View>
 
@@ -245,8 +245,8 @@ export default function HomeScreen({ navigation }: any) {
                 </View>
 
                 <View style={styles.modalSection}>
-                  <Text style={styles.modalSectionTitle}>ESTIMATED FARES</Text>
-                  <Text style={styles.modalItem}>{selectedLine.fares}</Text>
+                  <Text style={styles.modalSectionTitle}>SERVICE CLASSES</Text>
+                  <Text style={styles.modalItem}>{selectedLine.serviceClasses}</Text>
                 </View>
 
                 <TouchableOpacity 
