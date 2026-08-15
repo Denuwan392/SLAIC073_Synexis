@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../utils/constants';
 
 interface InputFieldProps {
@@ -23,7 +24,7 @@ export default function InputField({ onSend }: InputFieldProps) {
           style={styles.input}
           value={text}
           onChangeText={setText}
-          placeholder="Ask about bus or train schedules..."
+          placeholder="Ask about bus times, trains, or routes..."
           placeholderTextColor={COLORS.textTertiary}
           onSubmitEditing={handleSend}
           returnKeyType="send"
@@ -32,16 +33,20 @@ export default function InputField({ onSend }: InputFieldProps) {
         />
       </View>
       <TouchableOpacity 
-        style={[styles.sendButton, !text.trim() && styles.sendButtonDisabled]} 
         onPress={handleSend}
         disabled={!text.trim()}
-        activeOpacity={0.7}
+        activeOpacity={0.8}
       >
-        <Text style={styles.sendIcon}>↑</Text>
+        <LinearGradient
+          colors={text.trim() ? [COLORS.primary, COLORS.primaryDark] : ['#CBD5E1', '#94A3B8']}
+          style={styles.sendButton}
+        >
+          <Text style={styles.sendIcon}>➔</Text>
+        </LinearGradient>
       </TouchableOpacity>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -50,37 +55,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     backgroundColor: COLORS.surface,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
   },
   inputWrapper: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDark,
+    backgroundColor: COLORS.surfaceSubtle,
     borderRadius: RADIUS.xl,
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+    paddingVertical: SPACING.xs + 2,
     marginRight: SPACING.sm,
-    maxHeight: 100,
+    maxHeight: 110,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   input: {
     fontSize: TYPOGRAPHY.fontSize.base,
     color: COLORS.textPrimary,
     lineHeight: TYPOGRAPHY.lineHeight.normal * TYPOGRAPHY.fontSize.base,
+    minHeight: 36,
   },
   sendButton: {
     width: 44,
     height: 44,
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
     ...SHADOWS.md,
   },
-  sendButtonDisabled: {
-    backgroundColor: COLORS.textTertiary,
-    opacity: 0.5,
-  },
   sendIcon: {
-    fontSize: 24,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    fontSize: 18,
     color: COLORS.textInverse,
+    fontWeight: 'bold',
   },
 });
