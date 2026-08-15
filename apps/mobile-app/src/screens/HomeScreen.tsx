@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, SafeAreaView, ScrollView, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, SafeAreaView, ScrollView, Modal, ImageBackground } from 'react-native';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../utils/constants';
 
 interface TransportCategoryDetail {
@@ -25,11 +25,11 @@ interface HubNode {
 }
 
 const HUB_NODES: HubNode[] = [
-  { id: 'colombo', name: 'Colombo Fort', region: 'Western Province', lines: ['Coastal Rail', 'Main Line Rail', 'Expressway Bus'], status: 'CENTRAL HUB', x: 25, y: 55 },
-  { id: 'kandy', name: 'Kandy Hub', region: 'Central Province', lines: ['Main Line Rail', 'Central Expressway EX-1'], status: 'HILL CAPITAL', x: 55, y: 40 },
-  { id: 'galle', name: 'Galle & Matara', region: 'Southern Province', lines: ['Coastal Rail', 'Southern Expressway AC'], status: 'COASTAL HUB', x: 35, y: 85 },
-  { id: 'jaffna', name: 'Jaffna Hub', region: 'Northern Province', lines: ['Northern Express Rail', 'Intercity AC Night Bus'], status: 'NORTHERN TERMINAL', x: 50, y: 15 },
-  { id: 'badulla', name: 'Ella & Badulla', region: 'Uva Province', lines: ['Main Line Mountain Rail', 'Ella Odyssey'], status: 'SCENIC TERMINAL', x: 75, y: 55 },
+  { id: 'jaffna', name: 'Jaffna Hub', region: 'Northern Province', lines: ['Northern Express Rail', 'Intercity AC Night Bus'], status: 'NORTHERN TERMINAL', x: 48, y: 16 },
+  { id: 'kandy', name: 'Kandy Hub', region: 'Central Province', lines: ['Main Line Rail', 'Central Expressway EX-1'], status: 'HILL CAPITAL', x: 53, y: 48 },
+  { id: 'colombo', name: 'Colombo Fort', region: 'Western Province', lines: ['Coastal Rail', 'Main Line Rail', 'Expressway Bus'], status: 'CENTRAL HUB', x: 33, y: 58 },
+  { id: 'badulla', name: 'Ella & Badulla', region: 'Uva Province', lines: ['Main Line Mountain Rail', 'Ella Odyssey'], status: 'SCENIC TERMINAL', x: 67, y: 57 },
+  { id: 'galle', name: 'Galle & Matara', region: 'Southern Province', lines: ['Coastal Rail', 'Southern Expressway AC'], status: 'COASTAL HUB', x: 42, y: 82 },
 ];
 
 const BUS_DETAILS: TransportCategoryDetail = {
@@ -92,7 +92,7 @@ const TRAIN_DETAILS: TransportCategoryDetail = {
 
 export default function HomeScreen({ navigation }: any) {
   const [selectedCategory, setSelectedCategory] = useState<TransportCategoryDetail | null>(null);
-  const [activeHub, setActiveHub] = useState<HubNode>(HUB_NODES[0]);
+  const [activeHub, setActiveHub] = useState<HubNode>(HUB_NODES[2]); // Default Colombo Fort
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -195,23 +195,21 @@ export default function HomeScreen({ navigation }: any) {
 
         {/* Interactive Transit Network Map */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>TRANSIT NETWORK MAP & HUBS</Text>
+          <Text style={styles.sectionTitle}>SRI LANKA TRANSIT MAP & HUBS</Text>
 
           <View style={styles.mapCanvasCard}>
             <View style={styles.mapCanvasHeader}>
-              <Text style={styles.mapCanvasTitle}>Sri Lanka Transit Map</Text>
-              <Text style={styles.mapCanvasSub}>Tap any node to view hub directions</Text>
+              <Text style={styles.mapCanvasTitle}>Interactive Island Map</Text>
+              <Text style={styles.mapCanvasSub}>Tap any station node to view hub details & directions</Text>
             </View>
 
-            {/* Map Canvas Visualizer */}
-            <View style={styles.mapContainer}>
-              {/* Connecting Corridor Lines */}
-              <View style={styles.corridorColomboKandy} />
-              <View style={styles.corridorColomboGalle} />
-              <View style={styles.corridorColomboJaffna} />
-              <View style={styles.corridorKandyBadulla} />
-
-              {/* Station Nodes */}
+            {/* Map Canvas with Authentic Sri Lanka Background */}
+            <ImageBackground 
+              source={require('../../assets/srilanka_map.png')} 
+              style={styles.mapContainer} 
+              resizeMode="contain"
+            >
+              {/* Station Nodes Positioned on Map */}
               {HUB_NODES.map((hub) => {
                 const isActive = activeHub.id === hub.id;
                 return (
@@ -232,7 +230,7 @@ export default function HomeScreen({ navigation }: any) {
                   </TouchableOpacity>
                 );
               })}
-            </View>
+            </ImageBackground>
 
             {/* Selected Station Hub Info */}
             <View style={styles.hubDetailsBox}>
@@ -551,7 +549,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   mapContainer: {
-    height: 200,
+    height: 240,
     backgroundColor: COLORS.surfaceSubtle,
     borderRadius: RADIUS.md,
     position: 'relative',
@@ -559,42 +557,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     marginBottom: SPACING.md,
-  },
-  corridorColomboKandy: {
-    position: 'absolute',
-    left: '30%',
-    top: '45%',
-    width: '28%',
-    height: 2,
-    backgroundColor: COLORS.cyan,
-    transform: [{ rotate: '-25deg' }],
-  },
-  corridorColomboGalle: {
-    position: 'absolute',
-    left: '28%',
-    top: '60%',
-    width: '12%',
-    height: 2,
-    backgroundColor: COLORS.cyan,
-    transform: [{ rotate: '70deg' }],
-  },
-  corridorColomboJaffna: {
-    position: 'absolute',
-    left: '30%',
-    top: '20%',
-    width: '25%',
-    height: 2,
-    backgroundColor: COLORS.emerald,
-    transform: [{ rotate: '-60deg' }],
-  },
-  corridorKandyBadulla: {
-    position: 'absolute',
-    left: '60%',
-    top: '45%',
-    width: '20%',
-    height: 2,
-    backgroundColor: COLORS.amber,
-    transform: [{ rotate: '30deg' }],
   },
   mapNode: {
     position: 'absolute',
