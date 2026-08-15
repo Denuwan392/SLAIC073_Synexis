@@ -13,7 +13,7 @@ export const getSchedules = async (query: string) => {
   try {
     const response = await apiClient.get(`/schedules?query=${encodeURIComponent(query)}`);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     throw new Error('Error fetching schedules: ' + error.message);
   }
 };
@@ -28,7 +28,7 @@ export const sendMessage = async (message: string) => {
     return {
       response: response.data.final_answer || response.data.message || 'No response'
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('API Error:', error);
     throw new Error('Error sending message: Network Error');
   }
@@ -39,7 +39,7 @@ export const getTrainTracking = async (trainId: string) => {
   try {
     const response = await apiClient.get(`/train-tracking/${trainId}`);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     throw new Error('Error fetching train tracking: ' + error.message);
   }
 };

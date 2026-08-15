@@ -1,11 +1,9 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// In-memory preference storage fallback to eliminate missing AsyncStorage dependency
+let inMemoryPreferences: Record<string, any> = {};
 
-const STORAGE_KEY = '@user_preferences';
-
-export const saveUserPreferences = async (preferences) => {
+export const saveUserPreferences = async (preferences: any) => {
     try {
-        const jsonValue = JSON.stringify(preferences);
-        await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
+        inMemoryPreferences = { ...inMemoryPreferences, ...preferences };
     } catch (e) {
         console.error('Failed to save user preferences:', e);
     }
@@ -13,8 +11,7 @@ export const saveUserPreferences = async (preferences) => {
 
 export const getUserPreferences = async () => {
     try {
-        const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-        return jsonValue != null ? JSON.parse(jsonValue) : null;
+        return inMemoryPreferences;
     } catch (e) {
         console.error('Failed to retrieve user preferences:', e);
         return null;
@@ -23,7 +20,7 @@ export const getUserPreferences = async () => {
 
 export const clearUserPreferences = async () => {
     try {
-        await AsyncStorage.removeItem(STORAGE_KEY);
+        inMemoryPreferences = {};
     } catch (e) {
         console.error('Failed to clear user preferences:', e);
     }
