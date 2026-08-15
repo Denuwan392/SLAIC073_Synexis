@@ -144,39 +144,6 @@ export default function HomeScreen({ navigation }: any) {
           </View>
         </View>
 
-        {/* Departure Terminal Display */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>FEATURED DEPARTURES</Text>
-            <Text style={styles.liveClock}>LIVE TIMETABLE</Text>
-          </View>
-
-          {SIGNATURE_DEPARTURES.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.departureRow}
-              onPress={() => navigation.navigate('Chat')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.timeBox}>
-                <Text style={styles.depTime}>{item.departs}</Text>
-                <Text style={styles.depStatus}>{item.status}</Text>
-              </View>
-
-              <View style={styles.routeBox}>
-                <Text style={styles.depRoute}>{item.route}</Text>
-                <Text style={styles.depVehicle}>{item.vehicle}</Text>
-              </View>
-
-              <View style={[styles.lineBadge, { backgroundColor: item.badgeBg }]}>
-                <Text style={[styles.lineBadgeText, { color: item.badgeColor }]}>
-                  {item.line}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-
         {/* Transit Network Hubs Guide */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>MAJOR TRANSIT HUBS</Text>
@@ -203,14 +170,7 @@ export default function HomeScreen({ navigation }: any) {
 
       </ScrollView>
 
-      {/* Floating AI Assistant FAB Button */}
-      <TouchableOpacity 
-        style={styles.fabBtn}
-        onPress={() => navigation.navigate('Chat')}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.fabText}>💬 Ask AI</Text>
-      </TouchableOpacity>
+
 
       {/* Schedule Detail Modal */}
       <Modal
