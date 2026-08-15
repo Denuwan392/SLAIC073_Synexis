@@ -214,13 +214,7 @@ export default function HomeScreen({ navigation }: any) {
                 ))}
               </View>
 
-              <TouchableOpacity 
-                style={styles.searchHubBtn}
-                onPress={() => navigation.navigate('Chat')}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.searchHubBtnText}>Get Directions to {activeHub.name} with AI ➔</Text>
-              </TouchableOpacity>
+
             </View>
           </View>
         </View>
