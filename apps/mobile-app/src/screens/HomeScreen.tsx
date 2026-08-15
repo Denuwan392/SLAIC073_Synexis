@@ -12,7 +12,7 @@ export default function HomeScreen({ navigation }: any) {
         <View style={styles.header}>
           <View>
             <Text style={styles.appName}>Synexis</Text>
-            <Text style={styles.subTitle}>Smart Transit Companion</Text>
+            <Text style={styles.subTitle}>Public Transport Assistant</Text>
           </View>
           <TouchableOpacity 
             style={styles.settingsBtn}
@@ -23,30 +23,26 @@ export default function HomeScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
 
-        {/* Main Search Card */}
-        <View style={styles.searchCard}>
-          <Text style={styles.searchCardTitle}>Ask Transit AI</Text>
-          <Text style={styles.searchCardSub}>Find bus routes, train times, and schedules in Sri Lanka.</Text>
-          
-          <TouchableOpacity 
-            style={styles.inputBox}
-            onPress={() => navigation.navigate('Chat')}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.searchIcon}>🔍</Text>
-            <Text style={styles.placeholder}>Search routes or ask a question...</Text>
-          </TouchableOpacity>
+        {/* Hero Card */}
+        <View style={styles.heroCard}>
+          <View style={styles.badgeRow}>
+            <Text style={styles.badgeText}>🤖 AI Assistant Active</Text>
+          </View>
+          <Text style={styles.heroTitle}>Smart Transit Assistant</Text>
+          <Text style={styles.heroSub}>
+            Ask for bus timetables, express train schedules, and route options across Sri Lanka.
+          </Text>
 
           <TouchableOpacity 
-            style={styles.chatBtn}
+            style={styles.heroBtn}
             onPress={() => navigation.navigate('Chat')}
             activeOpacity={0.8}
           >
-            <Text style={styles.chatBtnText}>Start Conversation ➔</Text>
+            <Text style={styles.heroBtnText}>💬 Start Transit Chat ➔</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Category Buttons */}
+        {/* Category Cards */}
         <View style={styles.categoryRow}>
           <TouchableOpacity 
             style={styles.categoryCard}
@@ -55,6 +51,7 @@ export default function HomeScreen({ navigation }: any) {
           >
             <Text style={styles.categoryEmoji}>🚌</Text>
             <Text style={styles.categoryTitle}>Bus Schedules</Text>
+            <Text style={styles.categorySub}>Intercity & SLTB</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -64,12 +61,13 @@ export default function HomeScreen({ navigation }: any) {
           >
             <Text style={styles.categoryEmoji}>🚆</Text>
             <Text style={styles.categoryTitle}>Train Schedules</Text>
+            <Text style={styles.categorySub}>Express & Commuter</Text>
           </TouchableOpacity>
         </View>
 
         {/* Popular Routes */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Popular Routes</Text>
+          <Text style={styles.sectionTitle}>Quick Route Queries</Text>
 
           {QUICK_PROMPTS.map((prompt) => (
             <TouchableOpacity
@@ -130,56 +128,52 @@ const styles = StyleSheet.create({
   settingsIcon: {
     fontSize: 18,
   },
-  searchCard: {
+  heroCard: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
     padding: SPACING.lg,
     marginVertical: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
-    ...SHADOWS.sm,
+    ...SHADOWS.md,
   },
-  searchCardTitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginBottom: 4,
-  },
-  searchCardSub: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.md,
-    lineHeight: 20,
-  },
-  inputBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  badgeRow: {
+    alignSelf: 'flex-start',
     backgroundColor: COLORS.surfaceSubtle,
-    borderRadius: RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm + 2,
-    marginBottom: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.full,
+    marginBottom: SPACING.sm,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  searchIcon: {
-    fontSize: 16,
-    marginRight: SPACING.sm,
+  badgeText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.primary,
   },
-  placeholder: {
+  heroTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    marginBottom: 6,
+  },
+  heroSub: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.lg,
+    lineHeight: 20,
   },
-  chatBtn: {
+  heroBtn: {
     backgroundColor: COLORS.primary,
     borderRadius: RADIUS.md,
-    paddingVertical: SPACING.sm + 2,
+    paddingVertical: SPACING.md - 2,
     alignItems: 'center',
   },
-  chatBtnText: {
+  heroBtnText: {
     color: COLORS.textInverse,
     fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
   categoryRow: {
     flexDirection: 'row',
@@ -197,24 +191,30 @@ const styles = StyleSheet.create({
     ...SHADOWS.sm,
   },
   categoryEmoji: {
-    fontSize: 28,
+    fontSize: 32,
     marginBottom: SPACING.xs,
   },
   categoryTitle: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
+    marginBottom: 2,
+  },
+  categorySub: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textSecondary,
   },
   section: {
     marginBottom: SPACING.lg,
   },
   sectionTitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: TYPOGRAPHY.fontSize.xs,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: SPACING.sm,
+    marginLeft: 2,
   },
   routeItem: {
     flexDirection: 'row',
