@@ -25,11 +25,11 @@ interface HubNode {
 }
 
 const HUB_NODES: HubNode[] = [
-  { id: 'jaffna', name: 'Jaffna Hub', region: 'Northern Province', lines: ['Northern Express Rail', 'Intercity AC Night Bus'], status: 'NORTHERN TERMINAL', x: 48, y: 16 },
-  { id: 'kandy', name: 'Kandy Hub', region: 'Central Province', lines: ['Main Line Rail', 'Central Expressway EX-1'], status: 'HILL CAPITAL', x: 53, y: 48 },
-  { id: 'colombo', name: 'Colombo Fort', region: 'Western Province', lines: ['Coastal Rail', 'Main Line Rail', 'Expressway Bus'], status: 'CENTRAL HUB', x: 33, y: 58 },
-  { id: 'badulla', name: 'Ella & Badulla', region: 'Uva Province', lines: ['Main Line Mountain Rail', 'Ella Odyssey'], status: 'SCENIC TERMINAL', x: 67, y: 57 },
-  { id: 'galle', name: 'Galle & Matara', region: 'Southern Province', lines: ['Coastal Rail', 'Southern Expressway AC'], status: 'COASTAL HUB', x: 42, y: 82 },
+  { id: 'jaffna', name: 'Jaffna Hub', region: 'Northern Province', lines: ['Northern Express Rail', 'Intercity AC Night Bus'], status: 'NORTHERN TERMINAL', x: 48, y: 22 },
+  { id: 'kandy', name: 'Kandy Hub', region: 'Central Province', lines: ['Main Line Rail', 'Central Expressway EX-1'], status: 'HILL CAPITAL', x: 52, y: 52 },
+  { id: 'colombo', name: 'Colombo Fort', region: 'Western Province', lines: ['Coastal Rail', 'Main Line Rail', 'Expressway Bus'], status: 'CENTRAL HUB', x: 42, y: 58 },
+  { id: 'badulla', name: 'Ella & Badulla', region: 'Uva Province', lines: ['Main Line Mountain Rail', 'Ella Odyssey'], status: 'SCENIC TERMINAL', x: 57, y: 60 },
+  { id: 'galle', name: 'Galle & Matara', region: 'Southern Province', lines: ['Coastal Rail', 'Southern Expressway AC'], status: 'COASTAL HUB', x: 47, y: 76 },
 ];
 
 const BUS_DETAILS: TransportCategoryDetail = {
