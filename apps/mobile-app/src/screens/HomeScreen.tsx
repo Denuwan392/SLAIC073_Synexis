@@ -1,24 +1,70 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, SafeAreaView, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, SafeAreaView, ScrollView, Modal } from 'react-native';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS, SIGNATURE_DEPARTURES } from '../utils/constants';
 
+interface LineDetail {
+  title: string;
+  type: string;
+  route: string;
+  departures: string[];
+  stops: string[];
+  fares: string;
+}
+
+const LINE_DETAILS: Record<string, LineDetail> = {
+  coastal: {
+    title: 'Coastal Line Railway',
+    type: 'Train Express',
+    route: 'Colombo Fort ↔ Galle ↔ Matara',
+    departures: ['06:30 AM (Ruhunu Kumari)', '07:00 AM (Galle Express)', '10:30 AM (Dakshina)', '04:30 PM (Sagarika)', '05:30 PM (Samudra Devi)'],
+    stops: ['Colombo Fort', 'Panadura', 'Kalutara South', 'Aluthgama', 'Ambalangoda', 'Hikkaduwa', 'Galle', 'Weligama', 'Matara'],
+    fares: '3rd Class: LKR 240 | 2nd Class: LKR 500 | 1st Class: LKR 1,200',
+  },
+  mainline: {
+    title: 'Main Line Railway',
+    type: 'Train Express',
+    route: 'Colombo Fort ↔ Kandy ↔ Badulla',
+    departures: ['05:30 AM (Ella Odyssey)', '05:55 AM (Podi Menike)', '08:30 AM (Udarata Menike)', '12:40 PM (Senkadagala)', '05:45 PM (Kandy Express)'],
+    stops: ['Colombo Fort', 'Ragama', 'Gampaha', 'Polgahawela', 'Rambukkana', 'Peradeniya', 'Kandy', 'Nanu Oya', 'Ella', 'Badulla'],
+    fares: '3rd Class: LKR 300 | 2nd Class: LKR 600 | Luxury Tourist: LKR 2,500',
+  },
+  southern: {
+    title: 'Southern Expressway AC',
+    type: 'Luxury Bus',
+    route: 'Colombo (Makumbura) ↔ Galle ↔ Matara',
+    departures: ['Departures every 20 minutes from 05:00 AM to 09:00 PM daily.'],
+    stops: ['Makumbura Multimodal Center', 'Galle Central Bus Stand', 'Matara Highway Station'],
+    fares: 'Colombo ➔ Galle: LKR 950 | Colombo ➔ Matara: LKR 1,250',
+  },
+  central: {
+    title: 'Central Expressway AC',
+    type: 'Luxury Bus',
+    route: 'Colombo (Pettah) ↔ Kandy (Goods Shed)',
+    departures: ['Departures every 30 minutes from 05:00 AM to 08:30 PM daily.'],
+    stops: ['Pettah Central Terminal', 'Mirigama Interchange', 'Kurunegala Interchange', 'Kandy Goods Shed'],
+    fares: 'Expressway AC Luxury: LKR 1,100 | SLTB Normal: LKR 480',
+  },
+};
+
 export default function HomeScreen({ navigation }: any) {
+  const [selectedLine, setSelectedLine] = useState<LineDetail | null>(null);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         
-        {/* Signature Brand Header */}
+        {/* Header */}
         <View style={styles.header}>
           <View>
             <View style={styles.brandRow}>
               <Text style={styles.brandTitle}>SYNEXIS</Text>
               <View style={styles.liveBadge}>
                 <View style={styles.liveDot} />
-                <Text style={styles.liveText}>LIVE TRANSIT</Text>
+                <Text style={styles.liveText}>NETWORK NORMAL</Text>
               </View>
             </View>
-            <Text style={styles.subTitle}>Sri Lanka Public Transport Network</Text>
+            <Text style={styles.subTitle}>Sri Lanka Public Transit Guide</Text>
           </View>
 
           <TouchableOpacity 
@@ -30,20 +76,16 @@ export default function HomeScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
 
-        {/* Bespoke Route Node Finder */}
-        <View style={styles.routeCard}>
-          <Text style={styles.routeCardHeader}>FIND ROUTE & SCHEDULES</Text>
+        {/* Route Finder Card */}
+        <View style={styles.plannerCard}>
+          <Text style={styles.cardHeader}>ROUTE & SCHEDULE FINDER</Text>
           
-          <TouchableOpacity 
-            style={styles.nodeWrapper}
-            onPress={() => navigation.navigate('Chat')}
-            activeOpacity={0.9}
-          >
+          <View style={styles.nodeWrapper}>
             <View style={styles.nodeRow}>
               <View style={[styles.nodeDot, styles.nodeOrigin]} />
               <View style={styles.nodeTextWrapper}>
                 <Text style={styles.nodeLabel}>ORIGIN</Text>
-                <Text style={styles.nodeValue}>Colombo Fort Station</Text>
+                <Text style={styles.nodeValue}>Colombo Fort</Text>
               </View>
             </View>
 
@@ -53,7 +95,7 @@ export default function HomeScreen({ navigation }: any) {
               <View style={[styles.nodeDot, styles.nodeDest]} />
               <View style={styles.nodeTextWrapper}>
                 <Text style={styles.nodeLabel}>DESTINATION</Text>
-                <Text style={styles.nodeValuePlaceholder}>Where do you want to go?</Text>
+                <Text style={styles.nodeValuePlaceholder}>Select station or route...</Text>
               </View>
             </View>
 
@@ -62,43 +104,51 @@ export default function HomeScreen({ navigation }: any) {
               onPress={() => navigation.navigate('Chat')}
               activeOpacity={0.8}
             >
-              <Text style={styles.actionBtnText}>Search Schedules & Ask AI ➔</Text>
+              <Text style={styles.actionBtnText}>🔍 Search Timetables with AI ➔</Text>
             </TouchableOpacity>
-          </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Transit Line Grid */}
-        <View style={styles.linesGrid}>
-          <TouchableOpacity style={styles.lineCard} onPress={() => navigation.navigate('Chat')}>
-            <Text style={styles.lineCardIcon}>🚆</Text>
-            <Text style={styles.lineCardTitle}>Coastal Rail</Text>
-            <Text style={styles.lineCardSub}>Colombo ➔ Galle</Text>
-          </TouchableOpacity>
+        {/* Real Line Explorer (Opens Schedule Modal) */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>TRANSIT LINES & TIMETABLES</Text>
+          
+          <View style={styles.linesGrid}>
+            <TouchableOpacity style={styles.lineCard} onPress={() => setSelectedLine(LINE_DETAILS.coastal)}>
+              <Text style={styles.lineCardIcon}>🚆</Text>
+              <Text style={styles.lineCardTitle}>Coastal Rail</Text>
+              <Text style={styles.lineCardSub}>Colombo ➔ Galle</Text>
+              <Text style={styles.viewScheduleText}>View Schedule ➔</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.lineCard} onPress={() => navigation.navigate('Chat')}>
-            <Text style={styles.lineCardIcon}>🚆</Text>
-            <Text style={styles.lineCardTitle}>Main Line Rail</Text>
-            <Text style={styles.lineCardSub}>Colombo ➔ Kandy</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.lineCard} onPress={() => setSelectedLine(LINE_DETAILS.mainline)}>
+              <Text style={styles.lineCardIcon}>🚆</Text>
+              <Text style={styles.lineCardTitle}>Main Line Rail</Text>
+              <Text style={styles.lineCardSub}>Colombo ➔ Kandy</Text>
+              <Text style={styles.viewScheduleText}>View Schedule ➔</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.lineCard} onPress={() => navigation.navigate('Chat')}>
-            <Text style={styles.lineCardIcon}>🚌</Text>
-            <Text style={styles.lineCardTitle}>Southern Highway</Text>
-            <Text style={styles.lineCardSub}>Matara Luxury AC</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.lineCard} onPress={() => setSelectedLine(LINE_DETAILS.southern)}>
+              <Text style={styles.lineCardIcon}>🚌</Text>
+              <Text style={styles.lineCardTitle}>Southern Highway</Text>
+              <Text style={styles.lineCardSub}>Matara Luxury AC</Text>
+              <Text style={styles.viewScheduleText}>View Schedule ➔</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.lineCard} onPress={() => navigation.navigate('Chat')}>
-            <Text style={styles.lineCardIcon}>🚌</Text>
-            <Text style={styles.lineCardTitle}>Central Highway</Text>
-            <Text style={styles.lineCardSub}>Kandy Express</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.lineCard} onPress={() => setSelectedLine(LINE_DETAILS.central)}>
+              <Text style={styles.lineCardIcon}>🚌</Text>
+              <Text style={styles.lineCardTitle}>Central Highway</Text>
+              <Text style={styles.lineCardSub}>Kandy Express</Text>
+              <Text style={styles.viewScheduleText}>View Schedule ➔</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Digital Station Departure Board */}
+        {/* Departure Terminal Display */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>TERMINAL DEPARTURE BOARD</Text>
-            <Text style={styles.liveClock}>REAL-TIME</Text>
+            <Text style={styles.sectionTitle}>FEATURED DEPARTURES</Text>
+            <Text style={styles.liveClock}>LIVE TIMETABLE</Text>
           </View>
 
           {SIGNATURE_DEPARTURES.map((item) => (
@@ -127,11 +177,94 @@ export default function HomeScreen({ navigation }: any) {
           ))}
         </View>
 
+        {/* Fares & Ticket Reference Guide */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>TRANSIT FARE REFERENCE</Text>
+          <View style={styles.fareCard}>
+            <View style={styles.fareRow}>
+              <Text style={styles.fareType}>🚆 Railway Fares</Text>
+              <Text style={styles.fareAmount}>LKR 120 - LKR 1,500</Text>
+            </View>
+            <Text style={styles.fareDetail}>3rd Class Economy, 2nd Class Reserved, 1st Class AC</Text>
+
+            <View style={styles.fareDivider} />
+
+            <View style={styles.fareRow}>
+              <Text style={styles.fareType}>🚌 Expressway AC Bus</Text>
+              <Text style={styles.fareAmount}>LKR 950 - LKR 1,450</Text>
+            </View>
+            <Text style={styles.fareDetail}>Point-to-point highway express services</Text>
+          </View>
+        </View>
+
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Synexis Obsidian Edition • Sri Lanka Transit Engine</Text>
+          <Text style={styles.footerText}>Synexis Mobile Edition • Sri Lanka Public Transit</Text>
         </View>
 
       </ScrollView>
+
+      {/* Floating AI Assistant FAB Button */}
+      <TouchableOpacity 
+        style={styles.fabBtn}
+        onPress={() => navigation.navigate('Chat')}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.fabText}>💬 Ask AI</Text>
+      </TouchableOpacity>
+
+      {/* Schedule Detail Modal */}
+      <Modal
+        visible={!!selectedLine}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedLine(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {selectedLine && (
+              <>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>{selectedLine.title}</Text>
+                  <TouchableOpacity onPress={() => setSelectedLine(null)}>
+                    <Text style={styles.closeBtn}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.modalSub}>{selectedLine.route}</Text>
+
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>DAILY DEPARTURES</Text>
+                  {selectedLine.departures.map((dep, idx) => (
+                    <Text key={idx} style={styles.modalItem}>• {dep}</Text>
+                  ))}
+                </View>
+
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>STOPS</Text>
+                  <Text style={styles.modalItem}>{selectedLine.stops.join(' ➔ ')}</Text>
+                </View>
+
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>ESTIMATED FARES</Text>
+                  <Text style={styles.modalItem}>{selectedLine.fares}</Text>
+                </View>
+
+                <TouchableOpacity 
+                  style={styles.modalAiBtn}
+                  onPress={() => {
+                    const query = `Show details for ${selectedLine.title}`;
+                    setSelectedLine(null);
+                    navigation.navigate('Chat');
+                  }}
+                >
+                  <Text style={styles.modalAiBtnText}>Ask AI Assistant For Live Details ➔</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -203,7 +336,7 @@ const styles = StyleSheet.create({
   settingsIcon: {
     fontSize: 16,
   },
-  routeCard: {
+  plannerCard: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
     padding: SPACING.lg,
@@ -212,7 +345,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     ...SHADOWS.md,
   },
-  routeCardHeader: {
+  cardHeader: {
     fontSize: 11,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.cyan,
@@ -257,9 +390,9 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   nodeValuePlaceholder: {
-    fontSize: TYPOGRAPHY.fontSize.base,
+    fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.cyan,
+    color: COLORS.textSecondary,
   },
   trackLine: {
     height: 16,
@@ -281,11 +414,32 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     letterSpacing: 0.5,
   },
+  section: {
+    marginVertical: SPACING.md,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+    paddingHorizontal: 2,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textSecondary,
+    letterSpacing: 1,
+  },
+  liveClock: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.emerald,
+    letterSpacing: 1,
+  },
   linesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginVertical: SPACING.md,
     gap: SPACING.xs,
   },
   lineCard: {
@@ -311,28 +465,12 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textSecondary,
     marginTop: 2,
+    marginBottom: 8,
   },
-  section: {
-    marginVertical: SPACING.md,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-    paddingHorizontal: 2,
-  },
-  sectionTitle: {
+  viewScheduleText: {
     fontSize: 11,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textSecondary,
-    letterSpacing: 1,
-  },
-  liveClock: {
-    fontSize: 10,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.emerald,
-    letterSpacing: 1,
+    color: COLORS.cyan,
   },
   departureRow: {
     flexDirection: 'row',
@@ -381,6 +519,38 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
+  fareCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  fareRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  fareType: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  fareAmount: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.cyan,
+  },
+  fareDetail: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textSecondary,
+  },
+  fareDivider: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginVertical: SPACING.sm,
+  },
   footer: {
     alignItems: 'center',
     paddingVertical: SPACING.xl,
@@ -388,5 +558,88 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textTertiary,
+  },
+  fabBtn: {
+    position: 'absolute',
+    bottom: SPACING.lg,
+    right: SPACING.lg,
+    backgroundColor: COLORS.cyan,
+    paddingHorizontal: SPACING.md + 4,
+    paddingVertical: SPACING.sm + 2,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    ...SHADOWS.md,
+  },
+  fabText: {
+    color: COLORS.textInverse,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.md,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  closeBtn: {
+    fontSize: 20,
+    color: COLORS.textTertiary,
+    fontWeight: 'bold',
+    padding: 4,
+  },
+  modalSub: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.cyan,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    marginBottom: SPACING.md,
+    marginTop: 2,
+  },
+  modalSection: {
+    marginBottom: SPACING.md,
+  },
+  modalSectionTitle: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textSecondary,
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  modalItem: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textPrimary,
+    lineHeight: 18,
+  },
+  modalAiBtn: {
+    backgroundColor: COLORS.cyan,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.sm + 2,
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+  },
+  modalAiBtnText: {
+    color: COLORS.textInverse,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
 });
