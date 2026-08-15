@@ -14,6 +14,24 @@ interface TransportCategoryDetail {
   }>;
 }
 
+interface HubNode {
+  id: string;
+  name: string;
+  region: string;
+  lines: string[];
+  status: string;
+  x: number;
+  y: number;
+}
+
+const HUB_NODES: HubNode[] = [
+  { id: 'colombo', name: 'Colombo Fort', region: 'Western Province', lines: ['Coastal Rail', 'Main Line Rail', 'Expressway Bus'], status: 'CENTRAL HUB', x: 25, y: 55 },
+  { id: 'kandy', name: 'Kandy Hub', region: 'Central Province', lines: ['Main Line Rail', 'Central Expressway EX-1'], status: 'HILL CAPITAL', x: 55, y: 40 },
+  { id: 'galle', name: 'Galle & Matara', region: 'Southern Province', lines: ['Coastal Rail', 'Southern Expressway AC'], status: 'COASTAL HUB', x: 35, y: 85 },
+  { id: 'jaffna', name: 'Jaffna Hub', region: 'Northern Province', lines: ['Northern Express Rail', 'Intercity AC Night Bus'], status: 'NORTHERN TERMINAL', x: 50, y: 15 },
+  { id: 'badulla', name: 'Ella & Badulla', region: 'Uva Province', lines: ['Main Line Mountain Rail', 'Ella Odyssey'], status: 'SCENIC TERMINAL', x: 75, y: 55 },
+];
+
 const BUS_DETAILS: TransportCategoryDetail = {
   title: 'Sri Lanka Bus Services',
   subtitle: 'Expressway AC, Intercity & SLTB Routes',
@@ -74,6 +92,7 @@ const TRAIN_DETAILS: TransportCategoryDetail = {
 
 export default function HomeScreen({ navigation }: any) {
   const [selectedCategory, setSelectedCategory] = useState<TransportCategoryDetail | null>(null);
+  const [activeHub, setActiveHub] = useState<HubNode>(HUB_NODES[0]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -174,23 +193,76 @@ export default function HomeScreen({ navigation }: any) {
           </View>
         </View>
 
-        {/* Transit Network Hubs Guide */}
+        {/* Interactive Transit Network Map */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>MAJOR TRANSIT HUBS</Text>
-          <View style={styles.fareCard}>
-            <View style={styles.fareRow}>
-              <Text style={styles.fareType}>🚆 Main Railway Hubs</Text>
-              <Text style={styles.fareAmount}>Central Terminal</Text>
-            </View>
-            <Text style={styles.fareDetail}>Colombo Fort, Maradana, Kandy, Galle, Jaffna, Anuradhapura</Text>
+          <Text style={styles.sectionTitle}>TRANSIT NETWORK MAP & HUBS</Text>
 
-            <View style={styles.fareDivider} />
-
-            <View style={styles.fareRow}>
-              <Text style={styles.fareType}>🚌 Main Expressway Hubs</Text>
-              <Text style={styles.fareAmount}>Highway Multimodal</Text>
+          <View style={styles.mapCanvasCard}>
+            <View style={styles.mapCanvasHeader}>
+              <Text style={styles.mapCanvasTitle}>Sri Lanka Transit Map</Text>
+              <Text style={styles.mapCanvasSub}>Tap any node to view hub directions</Text>
             </View>
-            <Text style={styles.fareDetail}>Makumbura MMC, Pettah Central Stand, Kandy Goods Shed</Text>
+
+            {/* Map Canvas Visualizer */}
+            <View style={styles.mapContainer}>
+              {/* Connecting Corridor Lines */}
+              <View style={styles.corridorColomboKandy} />
+              <View style={styles.corridorColomboGalle} />
+              <View style={styles.corridorColomboJaffna} />
+              <View style={styles.corridorKandyBadulla} />
+
+              {/* Station Nodes */}
+              {HUB_NODES.map((hub) => {
+                const isActive = activeHub.id === hub.id;
+                return (
+                  <TouchableOpacity
+                    key={hub.id}
+                    style={[
+                      styles.mapNode,
+                      { left: `${hub.x}%`, top: `${hub.y}%` },
+                      isActive && styles.mapNodeActive,
+                    ]}
+                    onPress={() => setActiveHub(hub)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={[styles.nodeInnerDot, isActive && styles.nodeInnerDotActive]} />
+                    <Text style={[styles.nodeMapLabel, isActive && styles.nodeMapLabelActive]}>
+                      {hub.name.split(' ')[0]}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Selected Station Hub Info */}
+            <View style={styles.hubDetailsBox}>
+              <View style={styles.hubHeaderRow}>
+                <View>
+                  <Text style={styles.hubName}>{activeHub.name}</Text>
+                  <Text style={styles.hubRegion}>{activeHub.region}</Text>
+                </View>
+                <View style={styles.hubStatusPill}>
+                  <Text style={styles.hubStatusText}>{activeHub.status}</Text>
+                </View>
+              </View>
+
+              <Text style={styles.connectingLabel}>CONNECTING ROUTES & LINES:</Text>
+              <View style={styles.linesListRow}>
+                {activeHub.lines.map((line, i) => (
+                  <View key={i} style={styles.lineTagPill}>
+                    <Text style={styles.lineTagText}>• {line}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <TouchableOpacity 
+                style={styles.searchHubBtn}
+                onPress={() => navigation.navigate('Chat')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.searchHubBtnText}>Get Directions to {activeHub.name} with AI ➔</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -457,37 +529,173 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.cyan,
   },
-  fareCard: {
+  mapCanvasCard: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
-  fareRow: {
+  mapCanvasHeader: {
+    marginBottom: SPACING.md,
+  },
+  mapCanvasTitle: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  mapCanvasSub: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  mapContainer: {
+    height: 200,
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: RADIUS.md,
+    position: 'relative',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: SPACING.md,
+  },
+  corridorColomboKandy: {
+    position: 'absolute',
+    left: '30%',
+    top: '45%',
+    width: '28%',
+    height: 2,
+    backgroundColor: COLORS.cyan,
+    transform: [{ rotate: '-25deg' }],
+  },
+  corridorColomboGalle: {
+    position: 'absolute',
+    left: '28%',
+    top: '60%',
+    width: '12%',
+    height: 2,
+    backgroundColor: COLORS.cyan,
+    transform: [{ rotate: '70deg' }],
+  },
+  corridorColomboJaffna: {
+    position: 'absolute',
+    left: '30%',
+    top: '20%',
+    width: '25%',
+    height: 2,
+    backgroundColor: COLORS.emerald,
+    transform: [{ rotate: '-60deg' }],
+  },
+  corridorKandyBadulla: {
+    position: 'absolute',
+    left: '60%',
+    top: '45%',
+    width: '20%',
+    height: 2,
+    backgroundColor: COLORS.amber,
+    transform: [{ rotate: '30deg' }],
+  },
+  mapNode: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transform: [{ translateX: -12 }, { translateY: -12 }],
+  },
+  mapNodeActive: {
+    zIndex: 10,
+  },
+  nodeInnerDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: COLORS.surfaceHighlight,
+    borderWidth: 2,
+    borderColor: COLORS.textSecondary,
+  },
+  nodeInnerDotActive: {
+    backgroundColor: COLORS.cyan,
+    borderColor: COLORS.textPrimary,
+    transform: [{ scale: 1.3 }],
+  },
+  nodeMapLabel: {
+    fontSize: 9,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textTertiary,
+    marginTop: 2,
+  },
+  nodeMapLabelActive: {
+    color: COLORS.cyan,
+  },
+  hubDetailsBox: {
+    backgroundColor: COLORS.surfaceSubtle,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  hubHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 2,
+    marginBottom: SPACING.sm,
   },
-  fareType: {
+  hubName: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
   },
-  fareAmount: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.cyan,
-  },
-  fareDetail: {
+  hubRegion: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textSecondary,
   },
-  fareDivider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: SPACING.sm,
+  hubStatusPill: {
+    backgroundColor: 'rgba(0, 242, 254, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+  },
+  hubStatusText: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.cyan,
+  },
+  connectingLabel: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textTertiary,
+    letterSpacing: 0.8,
+    marginBottom: 4,
+  },
+  linesListRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: SPACING.md,
+  },
+  lineTagPill: {
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  lineTagText: {
+    fontSize: 11,
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  searchHubBtn: {
+    backgroundColor: COLORS.cyan,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.sm + 2,
+    alignItems: 'center',
+  },
+  searchHubBtnText: {
+    color: COLORS.textInverse,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
   footer: {
     alignItems: 'center',
