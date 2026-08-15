@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://10.10.11.13:8000'; // Mac LAN IP for iPhone / physical device testing
+export const API_BASE_URL = 'http://192.168.0.101:8000'; // Current Mac LAN IP for mobile testing
 
 export const DEFAULT_LANGUAGE = 'en'; // Default language for the app
 
