@@ -4,7 +4,7 @@ import ChatBubble from '../components/ChatBubble';
 import InputField from '../components/InputField';
 import { fetchMessages, sendMessage } from '../services/api';
 import { Message } from '../types';
-import { COLORS, TYPOGRAPHY, SPACING, RADIUS, QUICK_PROMPTS } from '../utils/constants';
+import { COLORS, TYPOGRAPHY, SPACING, RADIUS } from '../utils/constants';
 
 export default function ChatScreen({ navigation }: any) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -115,22 +115,7 @@ export default function ChatScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
 
-        {/* Quick Suggestion Chips */}
-        <View style={styles.chipsRow}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsScroll}>
-            {QUICK_PROMPTS.map((prompt: any) => (
-              <TouchableOpacity
-                key={prompt.id}
-                style={styles.chip}
-                onPress={() => handleSend(prompt.query)}
-                disabled={isSending}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.chipText}>{prompt.title}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+
 
         {/* Messages List */}
         <View style={styles.messagesArea}>
