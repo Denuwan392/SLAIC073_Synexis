@@ -154,45 +154,6 @@ export default function HomeScreen({ navigation }: any) {
           </View>
         </View>
 
-        {/* 2 Main Transit Categories (Buses & Trains) */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>TRANSIT CATEGORIES</Text>
-          
-          <View style={styles.categoryStack}>
-            {/* Bus Category Card */}
-            <TouchableOpacity 
-              style={styles.modeCard} 
-              onPress={() => setSelectedCategory(BUS_DETAILS)}
-              activeOpacity={0.8}
-            >
-              <View style={styles.modeIconWrapper}>
-                <Text style={styles.modeEmoji}>🚌</Text>
-              </View>
-              <View style={styles.modeInfo}>
-                <Text style={styles.modeTitle}>Bus Services</Text>
-                <Text style={styles.modeSub}>Expressway AC, Intercity & SLTB Routes</Text>
-                <Text style={styles.modeAction}>View Bus Details ➔</Text>
-              </View>
-            </TouchableOpacity>
-
-            {/* Train Category Card */}
-            <TouchableOpacity 
-              style={styles.modeCard} 
-              onPress={() => setSelectedCategory(TRAIN_DETAILS)}
-              activeOpacity={0.8}
-            >
-              <View style={styles.modeIconWrapper}>
-                <Text style={styles.modeEmoji}>🚆</Text>
-              </View>
-              <View style={styles.modeInfo}>
-                <Text style={styles.modeTitle}>Train Services</Text>
-                <Text style={styles.modeSub}>Sri Lanka Railways Express Timetables</Text>
-                <Text style={styles.modeAction}>View Train Details ➔</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {/* Interactive Transit Network Map */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>SRI LANKA TRANSIT MAP & HUBS</Text>
@@ -261,6 +222,45 @@ export default function HomeScreen({ navigation }: any) {
                 <Text style={styles.searchHubBtnText}>Get Directions to {activeHub.name} with AI ➔</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+
+        {/* 2 Main Transit Categories (Buses & Trains) */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>TRANSIT CATEGORIES</Text>
+          
+          <View style={styles.categoryStack}>
+            {/* Bus Category Card */}
+            <TouchableOpacity 
+              style={styles.modeCard} 
+              onPress={() => setSelectedCategory(BUS_DETAILS)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.modeIconWrapper}>
+                <Text style={styles.modeEmoji}>🚌</Text>
+              </View>
+              <View style={styles.modeInfo}>
+                <Text style={styles.modeTitle}>Bus Services</Text>
+                <Text style={styles.modeSub}>Expressway AC, Intercity & SLTB Routes</Text>
+                <Text style={styles.modeAction}>View Bus Details ➔</Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Train Category Card */}
+            <TouchableOpacity 
+              style={styles.modeCard} 
+              onPress={() => setSelectedCategory(TRAIN_DETAILS)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.modeIconWrapper}>
+                <Text style={styles.modeEmoji}>🚆</Text>
+              </View>
+              <View style={styles.modeInfo}>
+                <Text style={styles.modeTitle}>Train Services</Text>
+                <Text style={styles.modeSub}>Sri Lanka Railways Express Timetables</Text>
+                <Text style={styles.modeAction}>View Train Details ➔</Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
 
