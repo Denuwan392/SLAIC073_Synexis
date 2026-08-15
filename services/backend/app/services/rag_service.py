@@ -12,54 +12,61 @@ def get_genai_client():
     return None
 
 def retrieve_routes(query: str, top_k: int = 10) -> List[str]:
-    """Perform Directional Hybrid RAG Search (exact route matches + ChromaDB vector search)."""
+    """Perform Directional Hybrid RAG Search with transit mode filtering (train vs bus)."""
     from app.data.documents import documents
     
     query_clean = query.lower()
+    is_train_query = "train" in query_clean
+    is_bus_query = "bus" in query_clean
+    
     passages = []
     
-    # 1. Directional phrase search (e.g. "colombo to matara", "matara to colombo")
-    phrase_matches = []
-    for doc in documents:
-        for line in doc.split("\n"):
-            line_clean = line.strip()
-            if not line_clean:
-                continue
-            if query_clean in line_clean.lower():
-                phrase_matches.append(line_clean)
-                if len(phrase_matches) >= top_k:
-                    break
-        if len(phrase_matches) >= top_k:
-            break
-            
-    if phrase_matches:
-        passages.extend(phrase_matches)
+    known_locations = [
+        "colombo", "matara", "galle", "kandy", "jaffna", "trincomalee", 
+        "badulla", "anuradhapura", "kegalle", "mahiyanganaya", "kurunegala",
+        "negombo", "fort", "monaragala"
+    ]
+    found_locations = [loc for loc in known_locations if loc in query_clean]
+    
+    # 1. Mode-filtered location search (e.g. Galle + Train)
+    if found_locations:
+        loc_matches = []
+        for doc in documents:
+            for line in doc.split("\n"):
+                line_clean = line.strip()
+                if not line_clean:
+                    continue
+                line_lower = line_clean.lower()
+                
+                # Filter by mode if user specifically asks for train/bus
+                if is_train_query and "train" not in line_lower:
+                    continue
+                if is_bus_query and "bus" not in line_lower:
+                    continue
+                    
+                if all(loc in line_lower for loc in found_locations):
+                    if line_clean not in loc_matches:
+                        loc_matches.append(line_clean)
+                        if len(loc_matches) >= top_k:
+                            break
+            if len(loc_matches) >= top_k:
+                break
+        passages.extend(loc_matches)
 
-    # 2. Location-based matching if exact phrase returned fewer results
-    if len(passages) < top_k:
-        known_locations = [
-            "colombo", "matara", "galle", "kandy", "jaffna", "trincomalee", 
-            "badulla", "anuradhapura", "kegalle", "mahiyanganaya", "kurunegala",
-            "negombo", "fort", "monaragala"
-        ]
-        found_locations = [loc for loc in known_locations if loc in query_clean]
-        
-        if found_locations:
-            loc_matches = []
-            for doc in documents:
-                for line in doc.split("\n"):
-                    line_clean = line.strip()
-                    if not line_clean:
-                        continue
-                    line_lower = line_clean.lower()
-                    if all(loc in line_lower for loc in found_locations):
-                        if line_clean not in passages and line_clean not in loc_matches:
-                            loc_matches.append(line_clean)
-                            if len(passages) + len(loc_matches) >= top_k:
-                                break
-                if len(passages) + len(loc_matches) >= top_k:
-                    break
-            passages.extend(loc_matches)
+    # 2. General location search if mode filter returned fewer results
+    if len(passages) < top_k and found_locations:
+        for doc in documents:
+            for line in doc.split("\n"):
+                line_clean = line.strip()
+                if not line_clean or line_clean in passages:
+                    continue
+                line_lower = line_clean.lower()
+                if all(loc in line_lower for loc in found_locations):
+                    passages.append(line_clean)
+                    if len(passages) >= top_k:
+                        break
+            if len(passages) >= top_k:
+                break
 
     # 3. ChromaDB Vector Search Fallback
     if len(passages) < top_k:
@@ -156,7 +163,9 @@ QUESTION: {query}
         print(f"Answer generation error: {e}")
         if passages:
             formatted = "\n".join([f"• {p.strip()}" for p in passages[:6]])
-            return f"🚌 **Sri Lanka Transit Schedule Information:**\n\n{formatted}"
+            has_train = any("train" in p.lower() for p in passages)
+            header = "🚆 **Sri Lanka Railway Train Schedules:**" if has_train else "🚌 **Sri Lanka Transit Bus Schedules:**"
+            return f"{header}\n\n{formatted}"
         return "Sorry, transit service is temporarily busy. Please try again in a moment."
 
 def translate_response(text: str, target_lang: str) -> str:

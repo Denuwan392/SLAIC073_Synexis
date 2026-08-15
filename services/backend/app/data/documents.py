@@ -987,13 +987,39 @@ Route: Colombo to Anuradhapura. Bus: YA-01 (Yal Devi). Departs: 6:00, 10:00, 14:
 Route: Anuradhapura to Colombo. Bus: YA-02. Departs: 7:00, 11:00, 15:00, 19:00.
 """
 
+DOCUMENT17 = """
+Route: Colombo Fort to Galle. Train: 8058 (Ruhunu Kumari). Service: Express Train. Departs: 06:30. Arrives: 09:00. Stops: Panadura, Kalutara South, Aluthgama, Ambalangoda, Hikkaduwa, Galle.
+Route: Colombo Fort to Galle. Train: 8050 (Galle Express). Service: Express Train. Departs: 07:00. Arrives: 09:30. Stops: Kalutara South, Aluthgama, Hikkaduwa, Galle.
+Route: Colombo Fort to Galle. Train: 8056 (Dakshina Express). Service: Express Train. Departs: 10:30. Arrives: 13:05. Stops: Aluthgama, Hikkaduwa, Galle.
+Route: Colombo Fort to Galle. Train: 8096 (Sagarika). Service: Express Train. Departs: 16:30. Arrives: 19:15. Stops: Panadura, Kalutara South, Aluthgama, Ambalangoda, Hikkaduwa, Galle.
+Route: Colombo Fort to Galle. Train: 8760 (Samudra Devi). Service: Commuter Express. Departs: 17:30. Arrives: 20:10. Stops: Kalutara South, Aluthgama, Ambalangoda, Hikkaduwa, Galle.
+Route: Colombo Fort to Galle. Train: 8054 (Rajarata Rejini). Service: Express Train. Departs: 17:25. Arrives: 20:00. Stops: Panadura, Kalutara South, Aluthgama, Hikkaduwa, Galle.
 
+Route: Galle to Colombo Fort. Train: 8320 (Galle Commuter). Service: Express Train. Departs: 05:00. Arrives: 07:40. Stops: Hikkaduwa, Ambalangoda, Aluthgama, Kalutara South, Panadura, Colombo Fort.
+Route: Galle to Colombo Fort. Train: 8097 (Sagarika). Service: Express Train. Departs: 05:50. Arrives: 08:30. Stops: Hikkaduwa, Ambalangoda, Aluthgama, Kalutara South, Colombo Fort.
+Route: Galle to Colombo Fort. Train: 8059 (Ruhunu Kumari). Service: Express Train. Departs: 07:00. Arrives: 09:30. Stops: Hikkaduwa, Ambalangoda, Aluthgama, Kalutara South, Colombo Fort.
+Route: Galle to Colombo Fort. Train: 8051 (Galle Express). Service: Express Train. Departs: 14:30. Arrives: 17:05. Stops: Hikkaduwa, Aluthgama, Kalutara South, Colombo Fort.
 
+Route: Colombo Fort to Matara. Train: 8058 (Ruhunu Kumari). Service: Express Train. Departs: 06:30. Arrives: 09:50. Stops: Galle, Weligama, Matara.
+Route: Colombo Fort to Matara. Train: 8096 (Sagarika). Service: Express Train. Departs: 16:30. Arrives: 20:00. Stops: Galle, Weligama, Matara.
+Route: Matara to Colombo Fort. Train: 8097 (Sagarika). Service: Express Train. Departs: 05:00. Arrives: 08:30. Stops: Weligama, Galle, Aluthgama, Colombo Fort.
+Route: Matara to Colombo Fort. Train: 8059 (Ruhunu Kumari). Service: Express Train. Departs: 06:05. Arrives: 09:30. Stops: Weligama, Galle, Aluthgama, Colombo Fort.
+
+Route: Colombo Fort to Kandy. Train: 1005 (Podi Menike). Service: Express Train. Departs: 05:55. Arrives: 08:45. Stops: Ragama, Polgahawela, Rambukkana, Peradeniya, Kandy.
+Route: Colombo Fort to Kandy. Train: 1015 (Udarata Menike). Service: Express Train. Departs: 08:30. Arrives: 11:10. Stops: Gampaha, Polgahawela, Rambukkana, Peradeniya, Kandy.
+Route: Colombo Fort to Kandy. Train: 1041 (Ella Odyssey). Service: Luxury Tourist Train. Departs: 05:30. Arrives: 08:15. Stops: Gampaha, Peradeniya, Kandy.
+Route: Colombo Fort to Kandy. Train: 1035 (Senkadagala Menike). Service: Express Train. Departs: 12:40. Arrives: 15:30. Stops: Gampaha, Polgahawela, Peradeniya, Kandy.
+Route: Colombo Fort to Kandy. Train: 1021 (Kandy Express). Service: Intercity Express. Departs: 17:45. Arrives: 20:30. Stops: Peradeniya, Kandy.
+
+Route: Kandy to Colombo Fort. Train: 1036 (Senkadagala Menike). Service: Express Train. Departs: 06:00. Arrives: 08:45. Stops: Peradeniya, Polgahawela, Gampaha, Colombo Fort.
+Route: Kandy to Colombo Fort. Train: 1022 (Kandy Express). Service: Intercity Express. Departs: 06:30. Arrives: 09:15. Stops: Peradeniya, Colombo Fort.
+Route: Kandy to Colombo Fort. Train: 1006 (Podi Menike). Service: Express Train. Departs: 15:00. Arrives: 17:50. Stops: Peradeniya, Polgahawela, Colombo Fort.
+"""
 
 # Consolidated Documents List
 documents = [
     DOCUMENT0, DOCUMENT1, DOCUMENT2, DOCUMENT3, DOCUMENT4,
     DOCUMENT5, DOCUMENT6, DOCUMENT7, DOCUMENT8, DOCUMENT9,
     DOCUMENT10, DOCUMENT11, DOCUMENT12, DOCUMENT13, DOCUMENT14,
-    DOCUMENT15, DOCUMENT16
+    DOCUMENT15, DOCUMENT16, DOCUMENT17
 ]
