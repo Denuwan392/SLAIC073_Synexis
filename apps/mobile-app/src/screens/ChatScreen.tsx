@@ -115,7 +115,7 @@ export default function ChatScreen({ navigation }: any) {
         {/* Quick Suggestion Chips */}
         <View style={styles.chipsRow}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsScroll}>
-            {QUICK_PROMPTS.map((prompt) => (
+            {QUICK_PROMPTS.map((prompt: any) => (
               <TouchableOpacity
                 key={prompt.id}
                 style={styles.chip}

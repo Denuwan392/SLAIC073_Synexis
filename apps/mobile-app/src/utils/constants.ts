@@ -18,33 +18,41 @@ export const ERROR_MESSAGES = {
   API_ERROR: 'Unable to process transit request.',
 };
 
-// Clean, Minimalist Palette (Apple-inspired simplicity)
+// Citymapper / Apple Maps Production Transit Palette
 export const COLORS = {
-  primary: '#2563EB',         // Modern Clean Blue
-  primaryDark: '#1D4ED8',
-  primaryLight: '#3B82F6',
+  primary: '#2563EB',         // Citymapper Blue
+  primaryDark: '#1E3A8A',
+  primaryLight: '#EFF6FF',
   
-  secondary: '#10B981',       // Soft Green
-  accent: '#6366F1',
+  navy: '#0F172A',            // Slate Header
   
-  background: '#F9FAFB',      // Soft Clean Off-White
-  surface: '#FFFFFF',         // Pure White
-  surfaceSubtle: '#F3F4F6',   // Light Grey Fill
+  trainBadgeBg: '#DBEAFE',
+  trainBadgeText: '#1E40AF',
   
-  textPrimary: '#111827',     // Dark Charcoal
-  textSecondary: '#6B7280',   // Neutral Grey
-  textTertiary: '#9CA3AF',    // Soft Muted Grey
+  busBadgeBg: '#FEF3C7',
+  busBadgeText: '#92400E',
+  
+  expressBadgeBg: '#D1FAE5',
+  expressBadgeText: '#065F46',
+  
+  background: '#F8FAFC',
+  surface: '#FFFFFF',
+  surfaceSubtle: '#F1F5F9',
+  
+  textPrimary: '#0F172A',
+  textSecondary: '#475569',
+  textTertiary: '#94A3B8',
   textInverse: '#FFFFFF',
   
   userMessage: '#2563EB',
   botMessage: '#FFFFFF',
   userMessageText: '#FFFFFF',
-  botMessageText: '#111827',
+  botMessageText: '#0F172A',
   
-  border: '#E5E7EB',          // Subtle Border
-  borderLight: '#F3F4F6',
+  border: '#E2E8F0',
+  borderLight: '#F1F5F9',
   
-  shadow: '#000000',
+  shadow: '#0F172A',
 };
 
 export const TYPOGRAPHY = {
@@ -90,19 +98,62 @@ export const RADIUS = {
 export const SHADOWS = {
   sm: {
     shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
     elevation: 2,
   },
   md: {
     shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowRadius: 12,
+    elevation: 4,
   },
 };
+
+export const POPULAR_DEPARTURES = [
+  {
+    id: '1',
+    route: 'Colombo Fort → Galle',
+    line: 'Coastal Line',
+    vehicle: 'Ruhunu Kumari (Train 8058)',
+    departs: '06:30 AM',
+    duration: '2h 30m',
+    type: 'train',
+    query: 'Show me morning train schedules to Galle',
+  },
+  {
+    id: '2',
+    route: 'Colombo → Kandy',
+    line: 'Central Expressway',
+    vehicle: 'Expressway Luxury (Bus EX-1)',
+    departs: '07:00 AM',
+    duration: '2h 30m',
+    type: 'bus',
+    query: 'What bus options are available from Colombo to Kandy?',
+  },
+  {
+    id: '3',
+    route: 'Colombo Fort → Badulla',
+    line: 'Main Line',
+    vehicle: 'Podi Menike (Train 1005)',
+    departs: '05:55 AM',
+    duration: '8h 45m',
+    type: 'train',
+    query: 'Track train schedules departing from Colombo Fort',
+  },
+  {
+    id: '4',
+    route: 'Matara → Colombo',
+    line: 'Southern Line',
+    vehicle: 'SLTB Luxury (Bus SLTB-01)',
+    departs: '03:45 PM',
+    duration: '2h 35m',
+    type: 'bus',
+    query: 'Show me bus schedules from Matara to Colombo',
+  },
+];
 
 export const QUICK_PROMPTS = [
   { id: '1', title: 'Colombo to Kandy', query: 'What bus options are available from Colombo to Kandy?' },
