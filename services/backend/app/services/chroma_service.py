@@ -19,9 +19,9 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         self.document_mode = True
 
     def __call__(self, input: Documents) -> Embeddings:
+        dim = 3072
         if not self.client:
-            # Fallback zero-vector if key is unconfigured
-            return [[0.0] * 768 for _ in input]
+            return [[0.0] * dim for _ in input]
             
         batch_size = 50
         all_embeddings = []
@@ -29,19 +29,29 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         for i in range(0, len(input), batch_size):
             batch = input[i:i + batch_size]
             task = "retrieval_document" if self.document_mode else "retrieval_query"
-            try:
-                response = self.client.models.embed_content(
-                    model=settings.EMBEDDING_MODEL,
-                    contents=batch,
-                    config=types.EmbedContentConfig(task_type=task),
-                )
-                batch_embeddings = [e.values for e in response.embeddings]
-                all_embeddings.extend(batch_embeddings)
-            except Exception as e:
-                print(f"Error embedding batch {i} to {i + len(batch)}: {e}")
+            success = False
+            
+            for attempt in range(3):
+                try:
+                    response = self.client.models.embed_content(
+                        model=settings.EMBEDDING_MODEL,
+                        contents=batch,
+                        config=types.EmbedContentConfig(task_type=task),
+                    )
+                    batch_embeddings = [e.values for e in response.embeddings]
+                    all_embeddings.extend(batch_embeddings)
+                    success = True
+                    break
+                except Exception as e:
+                    if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                        time.sleep(2 * (attempt + 1))
+                    else:
+                        print(f"Error embedding batch {i} to {i + len(batch)}: {e}")
+                        break
+            
+            if not success:
                 for _ in batch:
-                    all_embeddings.append([0.0] * 768)
-                time.sleep(1)
+                    all_embeddings.append([0.0] * dim)
 
         return all_embeddings
 
