@@ -11,35 +11,73 @@ def get_genai_client():
         return genai.Client(api_key=settings.GOOGLE_API_KEY)
     return None
 
-def retrieve_routes(query: str, top_k: int = 5) -> List[str]:
-    """Perform vector similarity search against ChromaDB with keyword search fallback."""
+def retrieve_routes(query: str, top_k: int = 10) -> List[str]:
+    """Perform Directional Hybrid RAG Search (exact route matches + ChromaDB vector search)."""
+    from app.data.documents import documents
+    
+    query_clean = query.lower()
     passages = []
-    try:
-        embedding_fn.document_mode = False
-        query_embedding = embedding_fn([query])[0]
-        results = db.query(
-            query_embeddings=[query_embedding],
-            n_results=top_k
-        )
-        if results and results.get("documents") and len(results["documents"]) > 0:
-            passages = results["documents"][0]
-    except Exception as e:
-        print(f"Error querying ChromaDB: {e}")
-
-    # Fallback to direct document text matching if vector passages are empty
-    if not passages:
-        from app.data.documents import documents
-        query_words = [w.lower() for w in query.split() if len(w) > 2]
-        matched = []
-        for doc in documents:
-            doc_lower = doc.lower()
-            if any(w in doc_lower for w in query_words):
-                matched.append(doc[:300])
-                if len(matched) >= top_k:
+    
+    # 1. Directional phrase search (e.g. "colombo to matara", "matara to colombo")
+    phrase_matches = []
+    for doc in documents:
+        for line in doc.split("\n"):
+            line_clean = line.strip()
+            if not line_clean:
+                continue
+            if query_clean in line_clean.lower():
+                phrase_matches.append(line_clean)
+                if len(phrase_matches) >= top_k:
                     break
-        passages = matched
+        if len(phrase_matches) >= top_k:
+            break
+            
+    if phrase_matches:
+        passages.extend(phrase_matches)
 
-    return passages
+    # 2. Location-based matching if exact phrase returned fewer results
+    if len(passages) < top_k:
+        known_locations = [
+            "colombo", "matara", "galle", "kandy", "jaffna", "trincomalee", 
+            "badulla", "anuradhapura", "kegalle", "mahiyanganaya", "kurunegala",
+            "negombo", "fort", "monaragala"
+        ]
+        found_locations = [loc for loc in known_locations if loc in query_clean]
+        
+        if found_locations:
+            loc_matches = []
+            for doc in documents:
+                for line in doc.split("\n"):
+                    line_clean = line.strip()
+                    if not line_clean:
+                        continue
+                    line_lower = line_clean.lower()
+                    if all(loc in line_lower for loc in found_locations):
+                        if line_clean not in passages and line_clean not in loc_matches:
+                            loc_matches.append(line_clean)
+                            if len(passages) + len(loc_matches) >= top_k:
+                                break
+                if len(passages) + len(loc_matches) >= top_k:
+                    break
+            passages.extend(loc_matches)
+
+    # 3. ChromaDB Vector Search Fallback
+    if len(passages) < top_k:
+        try:
+            embedding_fn.document_mode = False
+            query_embedding = embedding_fn([query])[0]
+            results = db.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k
+            )
+            if results and results.get("documents") and len(results["documents"]) > 0:
+                for vec_doc in results["documents"][0]:
+                    if vec_doc not in passages:
+                        passages.append(vec_doc)
+        except Exception as e:
+            print(f"Error querying ChromaDB: {e}")
+
+    return passages[:top_k]
 
 def classify_query(query: str) -> Dict[str, Any]:
     """Classify language and transit intent using Gemini."""
