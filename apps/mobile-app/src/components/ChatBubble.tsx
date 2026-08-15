@@ -15,6 +15,38 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
     minute: '2-digit',
   });
 
+  const renderContent = (content: string) => {
+    // Strip raw markdown bold asterisks (**)
+    const cleanContent = content.replace(/\*\*/g, '');
+    const lines = cleanContent.split('\n');
+
+    return lines.map((line, index) => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        return <View key={index} style={{ height: 6 }} />;
+      }
+
+      const isTitle = trimmed.startsWith('🚆') || trimmed.startsWith('🚌');
+      const isCardHeader = trimmed.startsWith('📌');
+      const isBullet = trimmed.startsWith('•') || trimmed.startsWith('-');
+
+      return (
+        <Text
+          key={index}
+          style={[
+            styles.messageText,
+            isUser ? styles.userText : styles.botText,
+            isTitle && styles.titleLine,
+            isCardHeader && styles.cardHeaderLine,
+            isBullet && styles.bulletLine,
+          ]}
+        >
+          {trimmed}
+        </Text>
+      );
+    });
+  };
+
   return (
     <View style={[styles.container, isUser ? styles.userContainer : styles.botContainer]}>
       <View style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}>
@@ -24,9 +56,9 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
             <View style={styles.verifiedDot} />
           </View>
         )}
-        <Text style={[styles.messageText, isUser ? styles.userText : styles.botText]}>
-          {message.content}
-        </Text>
+        
+        {renderContent(message.content)}
+
         <Text style={[styles.timestamp, isUser ? styles.userTimestamp : styles.botTimestamp]}>
           {formattedTime}
         </Text>
@@ -47,7 +79,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   bubble: {
-    maxWidth: '85%',
+    maxWidth: '88%',
     borderRadius: RADIUS.md,
     padding: SPACING.md,
   },
@@ -66,7 +98,7 @@ const styles = StyleSheet.create({
   botBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   botTitle: {
     fontSize: 10,
@@ -83,7 +115,8 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    lineHeight: TYPOGRAPHY.lineHeight.normal * TYPOGRAPHY.fontSize.sm,
+    lineHeight: 20,
+    marginBottom: 2,
   },
   userText: {
     color: COLORS.textInverse,
@@ -91,6 +124,24 @@ const styles = StyleSheet.create({
   },
   botText: {
     color: COLORS.textPrimary,
+  },
+  titleLine: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.cyan,
+    marginBottom: 6,
+  },
+  cardHeaderLine: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    marginTop: 4,
+    marginBottom: 2,
+  },
+  bulletLine: {
+    fontSize: TYPOGRAPHY.fontSize.xs + 1,
+    color: COLORS.textSecondary,
+    marginLeft: 4,
   },
   timestamp: {
     fontSize: 10,

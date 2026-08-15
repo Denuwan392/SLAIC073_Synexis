@@ -119,6 +119,53 @@ JSON Output Format:
             "route_mentioned": None
         }
 
+def format_passage_clean(p: str) -> str:
+    """Format raw dataset passage into clean structured schedule block."""
+    p_clean = p.strip()
+    # Replace dots between fields with newlines and clean arrows
+    parts = [part.strip() for part in p_clean.split(".") if part.strip()]
+    
+    title = ""
+    route = ""
+    dep = ""
+    arr = ""
+    stops = ""
+    service = ""
+    
+    for part in parts:
+        part_lower = part.lower()
+        if part_lower.startswith("train:") or part_lower.startswith("bus:"):
+            title = part.split(":", 1)[1].strip()
+        elif part_lower.startswith("route:"):
+            route = part.split(":", 1)[1].strip().replace(" to ", " ➔ ")
+        elif part_lower.startswith("departs:"):
+            dep = part.split(":", 1)[1].strip()
+        elif part_lower.startswith("arrives:"):
+            arr = part.split(":", 1)[1].strip()
+        elif part_lower.startswith("stops:"):
+            stops = part.split(":", 1)[1].strip()
+        elif part_lower.startswith("service:"):
+            service = part.split(":", 1)[1].strip()
+
+    lines = []
+    if title:
+        lines.append(f"📌 {title}")
+    if route:
+        lines.append(f"   Route: {route}")
+    if dep or arr:
+        time_str = f"   Departs: {dep}" if dep else ""
+        if arr:
+            time_str += f" | Arrives: {arr}" if dep else f"   Arrives: {arr}"
+        lines.append(time_str)
+    if service:
+        lines.append(f"   Service: {service}")
+    if stops:
+        lines.append(f"   Stops: {stops}")
+
+    if not lines:
+        return f"• {p_clean}"
+    return "\n".join(lines)
+
 def generate_transport_answer(query: str, passages: List[str]) -> str:
     """Synthesize natural language answer for buses and trains using retrieved passages."""
     query_clean = query.lower()
@@ -134,20 +181,25 @@ def generate_transport_answer(query: str, passages: List[str]) -> str:
     client = get_genai_client()
     if not client:
         if passages:
-            return "Here are matching schedules:\n" + "\n".join([f"• {p}" for p in passages[:5]])
+            blocks = [format_passage_clean(p) for p in passages[:5]]
+            header = "🚆 Sri Lanka Railway Schedules" if is_train else "🚌 Sri Lanka Transit Bus Schedules"
+            return f"{header}\n\n" + "\n\n".join(blocks)
         return "Sorry, Google Gemini API key is not configured and vector DB returned no exact match."
 
     prompt = f"""
 You are Synexis, a helpful Sri Lanka public transport assistant (buses and trains).
 Use ONLY the passages below to answer the user question.
 
-RULES:
+RULES & FORMATTING:
 - If user asks for "buses" → list ONLY bus options. Do NOT list trains.
 - If user asks for "trains" → list ONLY train options. Do NOT list buses.
-- For trains: Show train name/number, departure, arrival, and stops if available.
-- For buses: Show bus number, service type, departure, and arrival times.
-- Format output clearly with headings, bullet points, and emojis (🚌, 🚆, ⏱️).
-- Include travel time and service frequency if available in passages.
+- Output each schedule item in a clean structured format:
+  📌 [Train Name / Bus Number]
+  • Route: [Origin] ➔ [Destination]
+  • Departs: [Departure Time] | Arrives: [Arrival Time]
+  • Stops: [Key Stops]
+- Do NOT produce long unbroken paragraphs of text.
+- Leave double line breaks between separate schedule entries.
 
 QUESTION: {query}
 """
@@ -164,9 +216,9 @@ QUESTION: {query}
     except Exception as e:
         print(f"Answer generation error: {e}")
         if passages:
-            formatted = "\n".join([f"• {p.strip()}" for p in passages[:6]])
-            header = "🚆 **Sri Lanka Railway Train Schedules:**" if is_train else "🚌 **Sri Lanka Transit Bus Schedules:**"
-            return f"{header}\n\n{formatted}"
+            blocks = [format_passage_clean(p) for p in passages[:5]]
+            header = "🚆 **Sri Lanka Railway Schedules**" if is_train else "🚌 **Sri Lanka Transit Bus Schedules**"
+            return f"{header}\n\n" + "\n\n".join(blocks)
         return "Sorry, transit service is temporarily busy. Please try again in a moment."
 
 def translate_response(text: str, target_lang: str) -> str:
