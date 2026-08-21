@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.api import ask, schedules, train_tracking, health, routes
+from app.api import ask, schedules, train_tracking, health
 from app.services.chroma_service import init_chroma_db
 
 @asynccontextmanager
@@ -41,7 +41,6 @@ app.include_router(ask.router, tags=["Agent"])
 app.include_router(schedules.router, tags=["Schedules"])
 app.include_router(train_tracking.router, tags=["Train Tracking"])
 app.include_router(health.router, tags=["System"])
-app.include_router(routes.router, tags=["AI Route Map & ML"])
 
 # Mount Web Application static files if present
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
