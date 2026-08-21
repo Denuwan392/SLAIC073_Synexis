@@ -72,6 +72,14 @@
             background: linear-gradient(135deg, #3b82f6, #06b6d4);
             border: 2px solid #bae6fd;
         }
+        .pulse-pin {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8); }
+            70% { box-shadow: 0 0 0 15px rgba(56, 189, 248, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+        }
         /* Leaflet popup dark mode override */
         .leaflet-popup-content-wrapper {
             background: #1e293b !important;
@@ -105,16 +113,31 @@
             </div>
         </div>
 
-        <!-- Navigation Links -->
+        <!-- Navigation Links & Map Controls -->
         <div class="glass-panel px-3 py-2 rounded-2xl flex items-center space-x-3 pointer-events-auto shadow-2xl">
+            
+            <!-- Real Road Curves Toggle Switch -->
+            <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer pr-2 border-r border-slate-700">
+                <input type="checkbox" id="real-roads-toggle" checked class="rounded bg-slate-800 border-slate-600 text-blue-600 focus:ring-blue-500">
+                <span class="font-medium text-blue-400 flex items-center space-x-1">
+                    <i class="fas fa-road"></i>
+                    <span>Real Highway Curves</span>
+                </span>
+            </label>
+
+            <!-- Background Network Grid Toggle -->
+            <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer pr-2 border-r border-slate-700">
+                <input type="checkbox" id="network-grid-toggle" onchange="toggleNetworkGrid(this.checked)" class="rounded bg-slate-800 border-slate-600 text-emerald-600 focus:ring-emerald-500">
+                <span class="text-slate-400">Transit Corridors</span>
+            </label>
+
             <a href="index.html" class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition-all text-xs font-medium border border-slate-700">
                 <i class="fas fa-comments text-blue-400"></i>
                 <span>AI Chat Assistant</span>
             </a>
-            <div class="h-4 w-px bg-slate-700"></div>
             <div class="flex items-center space-x-1.5 px-2 text-xs text-emerald-400">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="font-medium" id="ml-status-text">ML Model Active (R²: 0.90)</span>
+                <span class="font-medium" id="ml-status-text">ML Active (R²: 0.90)</span>
             </div>
         </div>
     </header>
@@ -192,7 +215,7 @@
                         <i class="fas fa-route text-xl"></i>
                     </div>
                     <p class="text-xs font-semibold text-slate-300">No Route Selected</p>
-                    <p class="text-[11px] text-slate-500 mt-1 max-w-[200px]">Choose origin and destination above to compute AI multi-modal travel itinerary.</p>
+                    <p class="text-[11px] text-slate-500 mt-1 max-w-[200px]">Choose origin and destination above to compute real curved highway path and travel times.</p>
                 </div>
 
                 <!-- Dynamic Itinerary Display (Hidden initially) -->
@@ -209,6 +232,11 @@
                                 3h 15m
                             </span>
                         </div>
+                        <div class="flex items-center space-x-3 text-[11px] text-slate-400 mb-2">
+                            <span id="res-road-distance" class="text-blue-400 font-medium"><i class="fas fa-road mr-1"></i>-- km</span>
+                            <span>•</span>
+                            <span id="res-transfer-info">Direct Journey</span>
+                        </div>
                         <p class="text-[11px] text-slate-300 leading-relaxed" id="res-ai-reason"></p>
                     </div>
 
@@ -219,12 +247,6 @@
                             <!-- Legs injected by JS -->
                         </div>
                     </div>
-
-                    <!-- Alternative Routes Pills -->
-                    <div id="alternatives-section" class="pt-2 border-t border-slate-800 hidden">
-                        <h4 class="text-[11px] text-slate-400 font-medium mb-1.5">Alternative Options:</h4>
-                        <div id="alternatives-list" class="space-y-1.5"></div>
-                    </div>
                 </div>
 
             </div>
@@ -233,15 +255,15 @@
             <div class="pt-3 mt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
                 <div class="flex items-center space-x-1.5">
                     <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                    <span>Bus Route</span>
+                    <span>Bus Station</span>
                 </div>
                 <div class="flex items-center space-x-1.5">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                    <span>Train Line</span>
+                    <span>Railway Station</span>
                 </div>
                 <div class="flex items-center space-x-1.5">
                     <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-500 to-emerald-500"></span>
-                    <span>Hub</span>
+                    <span>Transit Hub</span>
                 </div>
             </div>
 
@@ -250,14 +272,13 @@
 
     <!-- Leaflet Map Script & Logic -->
     <script>
-        // API URL dynamic resolver
         const API_BASE = window.SYNEXIS_API_URL ? window.SYNEXIS_API_URL.replace('/ask', '') : 'http://localhost:8000';
 
         let map;
         let stationsData = [];
         let geojsonLayer = null;
-        let activeRouteLayer = null;
-        let currentOptimizationResponse = null;
+        let activeRouteGroup = null;
+        let startEndMarkersGroup = null;
 
         // Initialize Map centered on Sri Lanka
         function initMap() {
@@ -271,11 +292,14 @@
             // Zoom control on top right
             L.control.zoom({ position: 'topright' }).addTo(map);
 
-            // Dark CartoDB Tile Layer for modern aesthetics
+            // High-detail OpenStreetMap Voyager tiles
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                 maxZoom: 19,
                 subdomains: 'abcd',
             }).addTo(map);
+
+            activeRouteGroup = L.featureGroup().addTo(map);
+            startEndMarkersGroup = L.featureGroup().addTo(map);
 
             loadStationsAndRoutes();
         }
@@ -289,7 +313,7 @@
                 populateDropdowns(stationsData);
                 renderStationMarkers(stationsData);
 
-                // 2. Fetch GeoJSON Routes
+                // 2. Fetch GeoJSON Routes (for optional background corridor visualization)
                 const geoRes = await fetch(`${API_BASE}/api/routes/geo`);
                 const geoData = await geoRes.json();
                 renderGeoJSONRoutes(geoData);
@@ -299,7 +323,7 @@
             }
         }
 
-        // Populate Origin & Destination Select options
+        // Populate Dropdowns
         function populateDropdowns(stations) {
             const origSelect = document.getElementById('origin-select');
             const destSelect = document.getElementById('dest-select');
@@ -318,12 +342,11 @@
                 destSelect.appendChild(opt2);
             });
 
-            // Set default selections
             origSelect.value = "Colombo Fort";
-            destSelect.value = "Kandy";
+            destSelect.value = "Mahiyanganaya";
         }
 
-        // Render custom circular pins for all stations
+        // Render station circular markers
         function renderStationMarkers(stations) {
             stations.forEach(st => {
                 let pinClass = "pin-hub";
@@ -346,7 +369,6 @@
 
                 const marker = L.marker([st.lat, st.lng], { icon: icon }).addTo(map);
 
-                // Station details popup
                 const popupContent = `
                     <div class="p-1 min-w-[200px]">
                         <div class="flex items-center space-x-2 border-b border-slate-700 pb-1.5 mb-2">
@@ -355,50 +377,69 @@
                         <p class="text-xs text-slate-300 mb-0.5"><strong>Sinhala:</strong> ${st.name_si}</p>
                         <p class="text-xs text-slate-300 mb-0.5"><strong>Tamil:</strong> ${st.name_ta}</p>
                         <p class="text-xs text-slate-400 mt-1"><strong>Facility:</strong> ${st.station_type.replace('_', ' ').toUpperCase()}</p>
-                        <button onclick="setOriginDestination('${st.name}')" class="mt-2 w-full bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold py-1 rounded-lg transition-all">
-                            Set as Destination
-                        </button>
+                        <div class="flex space-x-1.5 mt-2.5">
+                            <button onclick="setOrigin('${st.name}')" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold py-1 rounded-lg transition-all">
+                                From Here
+                            </button>
+                            <button onclick="setDestination('${st.name}')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold py-1 rounded-lg transition-all">
+                                To Here
+                            </button>
+                        </div>
                     </div>
                 `;
                 marker.bindPopup(popupContent);
             });
         }
 
-        function setOriginDestination(stationName) {
-            document.getElementById('dest-select').value = stationName;
-        }
+        function setOrigin(name) { document.getElementById('origin-select').value = name; }
+        function setDestination(name) { document.getElementById('dest-select').value = name; }
 
-        // Render network lines
+        // Render network lines (Initially hidden for clean view, toggleable via switch)
         function renderGeoJSONRoutes(geoData) {
-            if (geojsonLayer) map.removeLayer(geojsonLayer);
-
             geojsonLayer = L.geoJSON(geoData, {
                 style: function (feature) {
                     const isTrain = feature.properties.mode === 'train';
                     return {
                         color: isTrain ? '#10b981' : '#3b82f6',
-                        weight: isTrain ? 3 : 2.5,
-                        opacity: 0.55,
+                        weight: 1.5,
+                        opacity: 0.25,
                         dashArray: isTrain ? '4, 4' : null
                     };
-                },
-                onEachFeature: function (feature, layer) {
-                    const p = feature.properties;
-                    layer.bindTooltip(`
-                        <div class="text-xs font-semibold">
-                            <span>${p.route_name}</span>
-                            <span class="text-slate-400">(${p.mode.toUpperCase()})</span>
-                        </div>
-                    `, { sticky: true });
-
-                    layer.on('mouseover', function () {
-                        this.setStyle({ weight: 5, opacity: 0.9 });
-                    });
-                    layer.on('mouseout', function () {
-                        geojsonLayer.resetStyle(this);
-                    });
                 }
-            }).addTo(map);
+            });
+            // Keep background grid hidden by default to prevent cluttered spiderweb
+        }
+
+        function toggleNetworkGrid(show) {
+            if (!geojsonLayer) return;
+            if (show) {
+                map.addLayer(geojsonLayer);
+            } else {
+                map.removeLayer(geojsonLayer);
+            }
+        }
+
+        // Fetch real highway / road coordinates from Open Source Routing Machine (OSRM)
+        async function fetchRealRoadCoordinates(originCoords, destCoords) {
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${originCoords.lng},${originCoords.lat};${destCoords.lng},${destCoords.lat}?overview=full&geometries=geojson`;
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.routes && data.routes.length > 0) {
+                        const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]); // [lat, lng]
+                        const distanceKm = Math.round(data.routes[0].distance / 1000);
+                        return { coords: coords, distanceKm: distanceKm };
+                    }
+                }
+            } catch (e) {
+                console.warn("OSRM routing fallback to direct curve:", e);
+            }
+            // Fallback: direct line if OSRM unavailable
+            return {
+                coords: [[originCoords.lat, originCoords.lng], [destCoords.lat, destCoords.lng]],
+                distanceKm: null
+            };
         }
 
         // Handle AI Route Optimization Form Submission
@@ -414,14 +455,13 @@
                 alert("Please select both Origin and Destination stations.");
                 return;
             }
-
             if (origin === destination) {
                 alert("Origin and Destination cannot be the same city.");
                 return;
             }
 
             const btn = document.getElementById('submit-btn');
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i><span>Optimizing with AI...</span>`;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i><span>Tracing Road Path...</span>`;
             btn.disabled = true;
 
             try {
@@ -438,8 +478,8 @@
 
                 if (!res.ok) throw new Error("Optimization failed");
 
-                currentOptimizationResponse = await res.json();
-                displayOptimizationResults(currentOptimizationResponse);
+                const responseData = await res.json();
+                await displayOptimizationResults(responseData);
 
             } catch (err) {
                 alert("Could not calculate route: " + err.message);
@@ -449,8 +489,8 @@
             }
         }
 
-        // Render Itinerary Cards & Draw Path on Map
-        function displayOptimizationResults(data) {
+        // Render Itinerary Cards & Draw Real Curved Road Path
+        async function displayOptimizationResults(data) {
             document.getElementById('results-placeholder').classList.add('hidden');
             document.getElementById('itinerary-content').classList.remove('hidden');
 
@@ -471,6 +511,7 @@
             document.getElementById('res-summary').textContent = best.summary;
             document.getElementById('res-duration').textContent = durationStr;
             document.getElementById('res-ai-reason').textContent = `💡 ${best.ai_recommendation_reason}`;
+            document.getElementById('res-transfer-info').textContent = best.is_direct ? "Direct Journey (No Transfers)" : `1 Transfer (${best.total_wait_minutes} min wait)`;
 
             // Render Steps Timeline
             const timelineContainer = document.getElementById('legs-timeline');
@@ -508,37 +549,91 @@
                 timelineContainer.appendChild(stepDiv);
             });
 
-            // Draw highlighted route line on the map
-            highlightRouteOnMap(best);
+            // Draw real road curves on the map
+            await drawRealRoadPathOnMap(best);
         }
 
-        // Draw glowing polyline for optimized route and zoom to fit
-        function highlightRouteOnMap(routePlan) {
-            if (activeRouteLayer) map.removeLayer(activeRouteLayer);
+        // Draw curved road path on the map
+        async function drawRealRoadPathOnMap(routePlan) {
+            activeRouteGroup.clearLayers();
+            startEndMarkersGroup.clearLayers();
 
-            const latLngs = [];
-            routePlan.legs.forEach(leg => {
+            const useRealRoads = document.getElementById('real-roads-toggle').checked;
+            let totalRealDistance = 0;
+            let allCoordinates = [];
+
+            for (const leg of routePlan.legs) {
                 const origSt = stationsData.find(s => s.name.toLowerCase() === leg.origin.toLowerCase());
                 const destSt = stationsData.find(s => s.name.toLowerCase() === leg.destination.toLowerCase());
 
-                if (origSt) latLngs.push([origSt.lat, origSt.lng]);
-                if (destSt) latLngs.push([destSt.lat, destSt.lng]);
-            });
+                if (origSt && destSt) {
+                    const isTrain = leg.mode === 'train';
+                    const routeColor = isTrain ? '#10b981' : '#0284c7';
+                    const glowColor = isTrain ? '#34d399' : '#38bdf8';
 
-            if (latLngs.length >= 2) {
-                activeRouteLayer = L.polyline(latLngs, {
-                    color: '#38bdf8',
-                    weight: 6,
-                    opacity: 0.95,
-                    lineCap: 'round',
-                    lineJoin: 'round'
-                }).addTo(map);
+                    let legCoords = [];
+                    if (useRealRoads) {
+                        const roadResult = await fetchRealRoadCoordinates(origSt, destSt);
+                        legCoords = roadResult.coords;
+                        if (roadResult.distanceKm) totalRealDistance += roadResult.distanceKm;
+                    } else {
+                        legCoords = [[origSt.lat, origSt.lng], [destSt.lat, destSt.lng]];
+                    }
 
-                map.fitBounds(activeRouteLayer.getBounds(), { padding: [80, 80] });
+                    allCoordinates.push(...legCoords);
+
+                    // 1. Outer Glow Line
+                    L.polyline(legCoords, {
+                        color: glowColor,
+                        weight: 8,
+                        opacity: 0.35,
+                        lineCap: 'round',
+                        lineJoin: 'round'
+                    }).addTo(activeRouteGroup);
+
+                    // 2. Core Solid Route Line (Dashed for trains)
+                    L.polyline(legCoords, {
+                        color: routeColor,
+                        weight: 4.5,
+                        opacity: 0.95,
+                        dashArray: isTrain ? '8, 8' : null,
+                        lineCap: 'round',
+                        lineJoin: 'round'
+                    }).addTo(activeRouteGroup);
+                }
+            }
+
+            // Update Road Distance in summary
+            if (totalRealDistance > 0) {
+                document.getElementById('res-road-distance').innerHTML = `<i class="fas fa-road mr-1 text-blue-400"></i><strong>${totalRealDistance} km</strong> (Road Distance)`;
+            }
+
+            // Add Pulse Marker on Origin and Destination
+            if (allCoordinates.length >= 2) {
+                const startPoint = allCoordinates[0];
+                const endPoint = allCoordinates[allCoordinates.length - 1];
+
+                const startPin = L.divIcon({
+                    className: 'custom-pin',
+                    html: `<div class="w-8 h-8 rounded-full bg-emerald-500 border-2 border-white text-white flex items-center justify-center pulse-pin font-bold text-xs shadow-lg"><i class="fas fa-play text-[10px]"></i></div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+                const endPin = L.divIcon({
+                    className: 'custom-pin',
+                    html: `<div class="w-8 h-8 rounded-full bg-rose-500 border-2 border-white text-white flex items-center justify-center pulse-pin font-bold text-xs shadow-lg"><i class="fas fa-flag-checkered text-[10px]"></i></div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+
+                L.marker(startPoint, { icon: startPin }).addTo(startEndMarkersGroup);
+                L.marker(endPoint, { icon: endPin }).addTo(startEndMarkersGroup);
+
+                // Smoothly pan & zoom to fit the exact road route
+                map.fitBounds(activeRouteGroup.getBounds(), { padding: [60, 60], maxZoom: 12 });
             }
         }
 
-        // Initialize on page load
         window.addEventListener('DOMContentLoaded', initMap);
     </script>
 </body>
