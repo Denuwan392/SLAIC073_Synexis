@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗺️ Sri Lanka Transit Map & AI Route Optimizer | NEED TO GO</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+            z-index: 1;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        /* Custom Station Marker Pin Styles */
+        .station-pin {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            font-size: 11px;
+            box-shadow: 0 0 14px rgba(0, 0, 0, 0.6);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+        .station-pin:hover {
+            transform: scale(1.3);
+            z-index: 1000 !important;
+        }
+        .pin-hub {
+            background: linear-gradient(135deg, #2563eb, #10b981);
+            border: 2px solid #ffffff;
+        }
+        .pin-train {
+            background: linear-gradient(135deg, #059669, #10b981);
+            border: 2px solid #a7f3d0;
+        }
+        .pin-bus {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            border: 2px solid #bae6fd;
+        }
+        /* Leaflet popup dark mode override */
+        .leaflet-popup-content-wrapper {
+            background: #1e293b !important;
+            color: #f8fafc !important;
+            border-radius: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+        }
+        .leaflet-popup-tip {
+            background: #1e293b !important;
+        }
+    </style>
+</head>
+<body class="overflow-hidden flex h-screen">
+
+    <!-- Leaflet Map Container -->
+    <div id="map"></div>
+
+    <!-- Top Navigation Bar -->
+    <header class="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
+        <div class="glass-panel px-4 py-2.5 rounded-2xl flex items-center space-x-3 pointer-events-auto shadow-2xl">
+            <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <i class="fas fa-map-location-dot text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-base font-bold text-white tracking-wide flex items-center space-x-2">
+                    <span>NEED TO GO</span>
+                    <span class="text-xs bg-emerald-500/20 text-emerald-400 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30">AI Route Map</span>
+                </h1>
+                <p class="text-xs text-slate-400">Sri Lanka Multi-Modal Network & ML Optimizer</p>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="glass-panel px-3 py-2 rounded-2xl flex items-center space-x-3 pointer-events-auto shadow-2xl">
+            <a href="index.html" class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition-all text-xs font-medium border border-slate-700">
+                <i class="fas fa-comments text-blue-400"></i>
+                <span>AI Chat Assistant</span>
+            </a>
+            <div class="h-4 w-px bg-slate-700"></div>
+            <div class="flex items-center space-x-1.5 px-2 text-xs text-emerald-400">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-medium" id="ml-status-text">ML Model Active (R²: 0.90)</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Left Floating Route Optimizer Card -->
+    <div class="absolute top-20 left-4 bottom-6 z-10 w-96 max-w-[calc(100vw-2rem)] flex flex-col pointer-events-none">
+        <div class="glass-panel p-5 rounded-3xl flex flex-col flex-1 shadow-2xl pointer-events-auto overflow-hidden">
+            
+            <!-- Optimizer Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 mb-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <h2 class="text-sm font-bold text-white">Smart Route Planner</h2>
+                </div>
+                <span class="text-[11px] font-medium text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700">
+                    Dijkstra + ML
+                </span>
+            </div>
+
+            <!-- Route Input Form -->
+            <form id="optimize-form" class="space-y-3 mb-4" onsubmit="handleRouteOptimization(event)">
+                <!-- Origin -->
+                <div>
+                    <label class="block text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Origin (From)</label>
+                    <div class="relative">
+                        <i class="fas fa-circle-dot absolute left-3 top-3 text-blue-400 text-xs"></i>
+                        <select id="origin-select" class="w-full bg-slate-800/90 text-slate-100 text-xs rounded-xl pl-8 pr-3 py-2.5 border border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" required>
+                            <option value="">Select departure city...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Destination -->
+                <div>
+                    <label class="block text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Destination (To)</label>
+                    <div class="relative">
+                        <i class="fas fa-location-dot absolute left-3 top-3 text-emerald-400 text-xs"></i>
+                        <select id="dest-select" class="w-full bg-slate-800/90 text-slate-100 text-xs rounded-xl pl-8 pr-3 py-2.5 border border-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all" required>
+                            <option value="">Select destination city...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Time & Mode Preferences Row -->
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div>
+                        <label class="block text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Depart After</label>
+                        <input type="time" id="time-input" value="06:00" class="w-full bg-slate-800/90 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Transit Mode</label>
+                        <select id="mode-select" class="w-full bg-slate-800/90 text-slate-100 text-xs rounded-xl px-2 py-2 border border-slate-700 focus:outline-none focus:border-blue-500 transition-all">
+                            <option value="">All (Bus & Train)</option>
+                            <option value="bus">Bus Only</option>
+                            <option value="train">Train Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn" class="w-full mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-lg shadow-blue-500/20 transition-all transform active:scale-98 cursor-pointer">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    <span>Calculate Optimal Route</span>
+                </button>
+            </form>
+
+            <!-- Results Section Container -->
+            <div id="results-container" class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-3">
+                
+                <!-- Placeholder when no route calculated -->
+                <div id="results-placeholder" class="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-500 mb-3 border border-slate-700">
+                        <i class="fas fa-route text-xl"></i>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-300">No Route Selected</p>
+                    <p class="text-[11px] text-slate-500 mt-1 max-w-[200px]">Choose origin and destination above to compute AI multi-modal travel itinerary.</p>
+                </div>
+
+                <!-- Dynamic Itinerary Display (Hidden initially) -->
+                <div id="itinerary-content" class="hidden space-y-3">
+                    
+                    <!-- Summary Card -->
+                    <div class="bg-gradient-to-br from-slate-800 to-slate-800/60 p-3.5 rounded-2xl border border-slate-700/80 shadow-md">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-emerald-400 flex items-center space-x-1.5">
+                                <i class="fas fa-bolt"></i>
+                                <span id="res-summary">Direct Express</span>
+                            </span>
+                            <span class="text-[11px] font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-2 py-0.5 rounded-full" id="res-duration">
+                                3h 15m
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-300 leading-relaxed" id="res-ai-reason"></p>
+                    </div>
+
+                    <!-- Steps Timeline -->
+                    <div class="space-y-2">
+                        <h3 class="text-[11px] uppercase tracking-wider text-slate-400 font-bold px-1">Itinerary Steps</h3>
+                        <div id="legs-timeline" class="space-y-2.5">
+                            <!-- Legs injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Alternative Routes Pills -->
+                    <div id="alternatives-section" class="pt-2 border-t border-slate-800 hidden">
+                        <h4 class="text-[11px] text-slate-400 font-medium mb-1.5">Alternative Options:</h4>
+                        <div id="alternatives-list" class="space-y-1.5"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Map Legend -->
+            <div class="pt-3 mt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+                <div class="flex items-center space-x-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                    <span>Bus Route</span>
+                </div>
+                <div class="flex items-center space-x-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    <span>Train Line</span>
+                </div>
+                <div class="flex items-center space-x-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-500 to-emerald-500"></span>
+                    <span>Hub</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Leaflet Map Script & Logic -->
+    <script>
+        // API URL dynamic resolver
+        const API_BASE = window.SYNEXIS_API_URL ? window.SYNEXIS_API_URL.replace('/ask', '') : 'http://localhost:8000';
+
+        let map;
+        let stationsData = [];
+        let geojsonLayer = null;
+        let activeRouteLayer = null;
+        let currentOptimizationResponse = null;
+
+        // Initialize Map centered on Sri Lanka
+        function initMap() {
+            map = L.map('map', {
+                center: [7.8731, 80.7718], // Central Sri Lanka
+                zoom: 8,
+                zoomControl: false,
+                attributionControl: false
+            });
+
+            // Zoom control on top right
+            L.control.zoom({ position: 'topright' }).addTo(map);
+
+            // Dark CartoDB Tile Layer for modern aesthetics
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                subdomains: 'abcd',
+            }).addTo(map);
+
+            loadStationsAndRoutes();
+        }
+
+        // Fetch stations and GeoJSON corridors from backend
+        async function loadStationsAndRoutes() {
+            try {
+                // 1. Fetch Stations
+                const stationsRes = await fetch(`${API_BASE}/api/stations`);
+                stationsData = await stationsRes.json();
+                populateDropdowns(stationsData);
+                renderStationMarkers(stationsData);
+
+                // 2. Fetch GeoJSON Routes
+                const geoRes = await fetch(`${API_BASE}/api/routes/geo`);
+                const geoData = await geoRes.json();
+                renderGeoJSONRoutes(geoData);
+
+            } catch (err) {
+                console.error("Failed to load map data:", err);
+            }
+        }
+
+        // Populate Origin & Destination Select options
+        function populateDropdowns(stations) {
+            const origSelect = document.getElementById('origin-select');
+            const destSelect = document.getElementById('dest-select');
+
+            stations.sort((a, b) => a.name.localeCompare(b.name));
+
+            stations.forEach(st => {
+                const opt1 = document.createElement('option');
+                opt1.value = st.name;
+                opt1.textContent = `${st.name} (${st.name_si})`;
+                origSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = st.name;
+                opt2.textContent = `${st.name} (${st.name_si})`;
+                destSelect.appendChild(opt2);
+            });
+
+            // Set default selections
+            origSelect.value = "Colombo Fort";
+            destSelect.value = "Kandy";
+        }
+
+        // Render custom circular pins for all stations
+        function renderStationMarkers(stations) {
+            stations.forEach(st => {
+                let pinClass = "pin-hub";
+                let iconClass = "fa-layer-group";
+
+                if (st.station_type === "bus_stand") {
+                    pinClass = "pin-bus";
+                    iconClass = "fa-bus";
+                } else if (st.station_type === "railway_station") {
+                    pinClass = "pin-train";
+                    iconClass = "fa-train";
+                }
+
+                const icon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div class="station-pin w-6 h-6 ${pinClass}"><i class="fas ${iconClass}"></i></div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+
+                const marker = L.marker([st.lat, st.lng], { icon: icon }).addTo(map);
+
+                // Station details popup
+                const popupContent = `
+                    <div class="p-1 min-w-[200px]">
+                        <div class="flex items-center space-x-2 border-b border-slate-700 pb-1.5 mb-2">
+                            <span class="text-sm font-bold text-white">${st.name}</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-0.5"><strong>Sinhala:</strong> ${st.name_si}</p>
+                        <p class="text-xs text-slate-300 mb-0.5"><strong>Tamil:</strong> ${st.name_ta}</p>
+                        <p class="text-xs text-slate-400 mt-1"><strong>Facility:</strong> ${st.station_type.replace('_', ' ').toUpperCase()}</p>
+                        <button onclick="setOriginDestination('${st.name}')" class="mt-2 w-full bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold py-1 rounded-lg transition-all">
+                            Set as Destination
+                        </button>
+                    </div>
+                `;
+                marker.bindPopup(popupContent);
+            });
+        }
+
+        function setOriginDestination(stationName) {
+            document.getElementById('dest-select').value = stationName;
+        }
+
+        // Render network lines
+        function renderGeoJSONRoutes(geoData) {
+            if (geojsonLayer) map.removeLayer(geojsonLayer);
+
+            geojsonLayer = L.geoJSON(geoData, {
+                style: function (feature) {
+                    const isTrain = feature.properties.mode === 'train';
+                    return {
+                        color: isTrain ? '#10b981' : '#3b82f6',
+                        weight: isTrain ? 3 : 2.5,
+                        opacity: 0.55,
+                        dashArray: isTrain ? '4, 4' : null
+                    };
+                },
+                onEachFeature: function (feature, layer) {
+                    const p = feature.properties;
+                    layer.bindTooltip(`
+                        <div class="text-xs font-semibold">
+                            <span>${p.route_name}</span>
+                            <span class="text-slate-400">(${p.mode.toUpperCase()})</span>
+                        </div>
+                    `, { sticky: true });
+
+                    layer.on('mouseover', function () {
+                        this.setStyle({ weight: 5, opacity: 0.9 });
+                    });
+                    layer.on('mouseout', function () {
+                        geojsonLayer.resetStyle(this);
+                    });
+                }
+            }).addTo(map);
+        }
+
+        // Handle AI Route Optimization Form Submission
+        async function handleRouteOptimization(event) {
+            event.preventDefault();
+
+            const origin = document.getElementById('origin-select').value;
+            const destination = document.getElementById('dest-select').value;
+            const departTime = document.getElementById('time-input').value || "06:00";
+            const mode = document.getElementById('mode-select').value || null;
+
+            if (!origin || !destination) {
+                alert("Please select both Origin and Destination stations.");
+                return;
+            }
+
+            if (origin === destination) {
+                alert("Origin and Destination cannot be the same city.");
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i><span>Optimizing with AI...</span>`;
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/routes/optimize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        origin: origin,
+                        destination: destination,
+                        depart_after: departTime,
+                        preferred_mode: mode
+                    })
+                });
+
+                if (!res.ok) throw new Error("Optimization failed");
+
+                currentOptimizationResponse = await res.json();
+                displayOptimizationResults(currentOptimizationResponse);
+
+            } catch (err) {
+                alert("Could not calculate route: " + err.message);
+            } finally {
+                btn.innerHTML = `<i class="fas fa-wand-magic-sparkles"></i><span>Calculate Optimal Route</span>`;
+                btn.disabled = false;
+            }
+        }
+
+        // Render Itinerary Cards & Draw Path on Map
+        function displayOptimizationResults(data) {
+            document.getElementById('results-placeholder').classList.add('hidden');
+            document.getElementById('itinerary-content').classList.remove('hidden');
+
+            const best = data.best_route;
+            if (!best) {
+                document.getElementById('res-summary').textContent = "No Direct Route";
+                document.getElementById('res-duration').textContent = "N/A";
+                document.getElementById('res-ai-reason').textContent = "No scheduled connections found for the selected time. Try changing departure time.";
+                document.getElementById('legs-timeline').innerHTML = "";
+                return;
+            }
+
+            // Duration format
+            const hrs = Math.floor(best.total_duration_minutes / 60);
+            const mins = best.total_duration_minutes % 60;
+            const durationStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins} mins`;
+
+            document.getElementById('res-summary').textContent = best.summary;
+            document.getElementById('res-duration').textContent = durationStr;
+            document.getElementById('res-ai-reason').textContent = `💡 ${best.ai_recommendation_reason}`;
+
+            // Render Steps Timeline
+            const timelineContainer = document.getElementById('legs-timeline');
+            timelineContainer.innerHTML = '';
+
+            best.legs.forEach(leg => {
+                const isTrain = leg.mode === 'train';
+                const modeColor = isTrain ? 'emerald' : 'blue';
+                const modeIcon = isTrain ? 'fa-train' : 'fa-bus';
+
+                const legDurationHrs = Math.floor(leg.duration_minutes / 60);
+                const legDurationMins = leg.duration_minutes % 60;
+                const legDurationStr = legDurationHrs > 0 ? `${legDurationHrs}h ${legDurationMins}m` : `${legDurationMins}m`;
+
+                const mlPredictedHrs = leg.predicted_duration_minutes ? Math.floor(leg.predicted_duration_minutes / 60) : null;
+                const mlPredictedMins = leg.predicted_duration_minutes ? leg.predicted_duration_minutes % 60 : null;
+                const mlStr = mlPredictedHrs !== null ? (mlPredictedHrs > 0 ? `${mlPredictedHrs}h ${mlPredictedMins}m` : `${mlPredictedMins}m`) : null;
+
+                const stepDiv = document.createElement('div');
+                stepDiv.className = `p-3 rounded-xl bg-slate-800/90 border border-slate-700/80 space-y-2`;
+                stepDiv.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-${modeColor}-400 flex items-center space-x-1.5">
+                            <i class="fas ${modeIcon}"></i>
+                            <span>Step ${leg.step_number}: ${leg.mode.toUpperCase()} (${leg.service_type})</span>
+                        </span>
+                        <span class="text-[11px] text-slate-400 font-medium">${leg.departs} ➔ ${leg.arrives}</span>
+                    </div>
+                    <p class="text-xs text-slate-200">${leg.instructions}</p>
+                    <div class="flex items-center justify-between pt-1 border-t border-slate-700/50 text-[11px]">
+                        <span class="text-slate-400">Scheduled: <strong class="text-slate-200">${legDurationStr}</strong></span>
+                        ${mlStr ? `<span class="bg-indigo-500/10 text-indigo-300 px-2 py-0.5 rounded-md border border-indigo-500/20 font-medium">🤖 ML Est: ${mlStr}</span>` : ''}
+                    </div>
+                `;
+                timelineContainer.appendChild(stepDiv);
+            });
+
+            // Draw highlighted route line on the map
+            highlightRouteOnMap(best);
+        }
+
+        // Draw glowing polyline for optimized route and zoom to fit
+        function highlightRouteOnMap(routePlan) {
+            if (activeRouteLayer) map.removeLayer(activeRouteLayer);
+
+            const latLngs = [];
+            routePlan.legs.forEach(leg => {
+                const origSt = stationsData.find(s => s.name.toLowerCase() === leg.origin.toLowerCase());
+                const destSt = stationsData.find(s => s.name.toLowerCase() === leg.destination.toLowerCase());
+
+                if (origSt) latLngs.push([origSt.lat, origSt.lng]);
+                if (destSt) latLngs.push([destSt.lat, destSt.lng]);
+            });
+
+            if (latLngs.length >= 2) {
+                activeRouteLayer = L.polyline(latLngs, {
+                    color: '#38bdf8',
+                    weight: 6,
+                    opacity: 0.95,
+                    lineCap: 'round',
+                    lineJoin: 'round'
+                }).addTo(map);
+
+                map.fitBounds(activeRouteLayer.getBounds(), { padding: [80, 80] });
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+</html>
