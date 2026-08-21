@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,18 +9,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Leaflet Interactive Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
             font-size: 15px;
         }
+
         .msg {
             animation: fadeIn 0.3s ease-in-out;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .typing-indicator {
             display: inline-block;
             width: 3px;
@@ -28,56 +43,83 @@
             margin: 0 2px;
             animation: typing 1s infinite;
         }
-        .typing-indicator:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typing {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 1; }
+
+        .typing-indicator:nth-child(2) {
+            animation-delay: 0.2s;
         }
+
+        .typing-indicator:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 100% {
+                opacity: 0.2;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
         .sidebar {
             height: 100vh;
             transition: all 0.3s ease;
         }
+
         .main-content {
             height: 100vh;
             transition: all 0.3s ease;
         }
-        .markdown-content h1, .markdown-content h2, .markdown-content h3, 
-        .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+
+        .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3,
+        .markdown-content h4,
+        .markdown-content h5,
+        .markdown-content h6 {
             margin-top: 0.8rem;
             margin-bottom: 0.4rem;
             font-weight: 600;
             font-size: 1.15em;
         }
+
         .markdown-content p {
             margin-bottom: 0.8rem;
             line-height: 1.6;
             font-size: 1em;
         }
-        .markdown-content ul, .markdown-content ol {
+
+        .markdown-content ul,
+        .markdown-content ol {
             margin-bottom: 0.8rem;
             padding-left: 1.3rem;
             font-size: 1em;
         }
+
         .markdown-content li {
             margin-bottom: 0.25rem;
             line-height: 1.5;
         }
+
         .markdown-content table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 0.8rem;
             font-size: 0.95em;
         }
-        .markdown-content th, .markdown-content td {
+
+        .markdown-content th,
+        .markdown-content td {
             border: 1px solid #e5e7eb;
             padding: 0.5rem;
             text-align: left;
         }
+
         .markdown-content th {
             background-color: #f3f4f6;
             font-weight: 600;
         }
+
         .markdown-content code {
             background-color: #f3f4f6;
             padding: 0.2rem 0.4rem;
@@ -85,6 +127,7 @@
             font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
             font-size: 0.9em;
         }
+
         .markdown-content pre {
             background-color: #f3f4f6;
             padding: 0.9rem;
@@ -93,11 +136,30 @@
             margin-bottom: 0.9rem;
             font-size: 0.95em;
         }
+
         .markdown-content * {
             max-width: 100%;
             word-wrap: break-word;
         }
-        
+
+        /* Leaflet Map Custom Styling */
+        #fullMap {
+            background: #e5e7eb;
+            z-index: 1;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 4px;
+        }
+
+        .leaflet-popup-content {
+            margin: 10px 14px;
+            line-height: 1.5;
+            font-family: 'Inter', sans-serif;
+        }
+
         /* Mobile Responsive Design */
         @media (max-width: 768px) {
             .sidebar {
@@ -105,12 +167,15 @@
                 transform: translateX(-100%);
                 z-index: 50;
             }
+
             .sidebar.open {
                 transform: translateX(0);
             }
+
             .main-content {
                 width: 100%;
             }
+
             .overlay {
                 position: fixed;
                 top: 0;
@@ -121,57 +186,72 @@
                 z-index: 40;
                 display: none;
             }
+
             .overlay.active {
                 display: block;
             }
+
             body {
                 font-size: 14px;
             }
+
             .container {
                 padding: 0.5rem;
             }
+
             #chatbox {
                 padding: 0.5rem;
             }
+
             .max-w-3xl {
                 max-width: 100%;
             }
+
             .w-56 {
                 width: 280px;
             }
         }
-        
+
         @media (max-width: 480px) {
             body {
                 font-size: 13px;
             }
+
             .p-4 {
                 padding: 0.75rem;
             }
+
             .p-3 {
                 padding: 0.5rem;
             }
+
             .text-base {
                 font-size: 0.95rem;
             }
+
             .text-sm {
                 font-size: 0.875rem;
             }
+
             .text-xs {
                 font-size: 0.75rem;
             }
+
             .rounded-lg {
                 border-radius: 0.375rem;
             }
-            .space-x-3 > * + * {
+
+            .space-x-3>*+* {
                 margin-left: 0.5rem;
             }
-            .space-y-4 > * + * {
+
+            .space-y-4>*+* {
                 margin-top: 0.75rem;
             }
         }
     </style>
 </head>
+
 <body class="bg-gray-50">
     <div class="overlay" id="overlay"></div>
     <div class="flex h-screen">
@@ -186,23 +266,35 @@
                 </div>
             </div>
             <div class="p-4 overflow-y-auto flex-1">
+                <!-- Interactive Map Link (Above Quick Links) -->
+                <div class="mb-4">
+                    <button onclick="openMapModal()"
+                        class="w-full text-left px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors flex items-center justify-between text-sm font-medium">
+                        <div class="flex items-center space-x-2.5">
+                            <i class="fas fa-map-marked-alt text-indigo-500"></i>
+                            <span>Interactive Map</span>
+                        </div>
+                        <i class="fas fa-arrow-up-right-from-square text-[10px] text-gray-400"></i>
+                    </button>
+                </div>
+
                 <div class="mb-5">
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Quick Links</h3>
                     <div class="space-y-2">
-                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                        <button onclick="sendQuickQuery('Show popular bus and train routes across Sri Lanka')" class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
                             <i class="fas fa-route text-blue-600"></i>
                             <span>Popular Routes</span>
                         </button>
-                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                        <button onclick="sendQuickQuery('What are the major train schedules like Colombo to Kandy, Galle, and Badulla?')" class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
                             <i class="fas fa-train text-green-600"></i>
                             <span>Train Schedules</span>
                         </button>
-                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                        <button onclick="sendQuickQuery('What is the live tracking status for trains today?')" class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
                             <i class="fas fa-clock text-orange-600"></i>
                             <span>Real-time Info</span>
                         </button>
-                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
-                            <i class="fas fa-map-marked-alt text-purple-600"></i>
+                        <button onclick="openMapModal()" class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                            <i class="fas fa-map-marked-alt text-blue-600"></i>
                             <span>Route Maps</span>
                         </button>
                     </div>
@@ -210,19 +302,19 @@
                 <div>
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Languages</h3>
                     <div class="space-y-2">
-                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                        <button onclick="sendQuickQuery('කොළඹ සිට ගාල්ලට බස් තියෙන්නේ කීයටද?')" class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
                             <i class="fas fa-language text-gray-600"></i>
                             <span>Sinhala</span>
                         </button>
-                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                        <button onclick="sendQuickQuery('கொழும்பிலிருந்து கண்டிக்கு பேருந்து எப்போது?')" class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
                             <i class="fas fa-language text-gray-600"></i>
                             <span>Tamil</span>
                         </button>
-                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                        <button onclick="sendQuickQuery('What are the buses from Colombo to Kandy?')" class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
                             <i class="fas fa-language text-gray-600"></i>
                             <span>English</span>
                         </button>
-                        <button class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
+                        <button onclick="sendQuickQuery('Help me find transport in Sri Lanka')" class="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 transition-colors flex items-center space-x-2 text-sm">
                             <i class="fas fa-globe text-blue-600"></i>
                             <span>Auto Detect</span>
                         </button>
@@ -279,13 +371,11 @@
                 <div class="max-w-3xl mx-auto">
                     <div class="flex items-end space-x-3">
                         <div class="flex-1 relative">
-                            <textarea 
-                                id="userInput" 
-                                placeholder="Ask about bus, train, or travel information in Sinhala, Tamil, or English..." 
+                            <textarea id="userInput"
+                                placeholder="Ask about bus, train, or travel information in Sinhala, Tamil, or English..."
                                 rows="1"
                                 class="w-full p-3.5 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm transition-all duration-200"
-                                onInput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'"
-                            ></textarea>
+                                onInput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'"></textarea>
                             <div class="absolute right-3 bottom-3 flex space-x-2">
                                 <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors hover:bg-gray-100 rounded-md">
                                     <i class="fas fa-paperclip text-sm"></i>
@@ -295,10 +385,8 @@
                                 </button>
                             </div>
                         </div>
-                        <button 
-                            onclick="sendMessage()" 
-                            class="bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white p-3.5 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md hover:shadow-lg transform hover:scale-105"
-                        >
+                        <button onclick="sendMessage()"
+                            class="bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white p-3.5 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md hover:shadow-lg transform hover:scale-105">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
@@ -325,25 +413,441 @@
         </div>
     </div>
 
+    <!-- Interactive Map Modal Overlay -->
+    <div id="mapModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 md:p-6 hidden opacity-0 transition-opacity duration-300">
+        <div id="mapModalContainer" class="bg-white w-full max-w-5xl h-[88vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
+            <!-- Modal Header -->
+            <div class="px-5 py-3.5 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3 bg-gray-50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-500 rounded-lg flex items-center justify-center text-white shadow-sm">
+                        <i class="fas fa-map-marked-alt text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm md:text-base font-bold text-gray-800">Sri Lanka Transit & Route Map</h3>
+                        <p class="text-xs text-gray-500 hidden sm:block">Interactive Railway Lines, Expressway Bus Corridors & Key Stations</p>
+                    </div>
+                </div>
+
+                <!-- Station Search & Route Planner Controls -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="toggleRoutePlanner()" id="btnTogglePlanner"
+                        class="text-xs px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white font-medium shadow-xs transition-all flex items-center space-x-1.5">
+                        <i class="fas fa-route text-xs"></i>
+                        <span>Find Best Route</span>
+                    </button>
+
+                    <div class="relative">
+                        <input id="stationSearchInput" type="text"
+                            placeholder="Find station (e.g. Kandy, Galle)..."
+                            class="text-xs pl-7 pr-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-44 sm:w-56 bg-white"
+                            oninput="searchStations(this.value)">
+                        <i class="fas fa-search absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
+                    </div>
+                    
+                    <button onclick="closeMapModal()" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 flex items-center justify-center transition-colors ml-1">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Map Body -->
+            <div class="flex-1 relative bg-gray-100">
+                <div id="fullMap" class="w-full h-full"></div>
+
+                <!-- Floating Route Optimizer Panel -->
+                <div id="routePlannerPanel" class="absolute top-3 left-3 z-20 w-80 sm:w-96 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 p-3.5 transition-all duration-300 max-h-[calc(100%-1.5rem)] flex flex-col hidden overflow-hidden">
+                    <div class="flex-shrink-0 flex items-center justify-between pb-2 border-b border-gray-200 mb-2.5">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-6 h-6 bg-gradient-to-r from-blue-600 to-green-500 rounded-md flex items-center justify-center text-white text-xs">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <h4 class="text-sm font-bold text-gray-800">Find Optimized Route</h4>
+                        </div>
+                        <button onclick="toggleRoutePlanner()" class="text-gray-400 hover:text-gray-600 p-1">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto space-y-2.5 pr-1">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 mb-1 flex items-center space-x-1">
+                                <i class="fas fa-map-marker-alt text-green-500 text-xs"></i>
+                                <span>Starting Point</span>
+                            </label>
+                            <select id="routeOrigin" class="w-full p-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="Colombo">Colombo (Fort / Pettah)</option>
+                                <option value="Kandy">Kandy (Goods Shed / Station)</option>
+                                <option value="Galle">Galle (Station / Highway)</option>
+                                <option value="Matara">Matara</option>
+                                <option value="Mahiyanganaya">Mahiyanganaya</option>
+                                <option value="Ella">Ella</option>
+                                <option value="Badulla">Badulla</option>
+                                <option value="Jaffna">Jaffna</option>
+                                <option value="Anuradhapura">Anuradhapura</option>
+                                <option value="Kurunegala">Kurunegala</option>
+                                <option value="Negombo">Negombo</option>
+                                <option value="Trincomalee">Trincomalee</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 mb-1 flex items-center space-x-1">
+                                <i class="fas fa-flag-checkered text-red-500 text-xs"></i>
+                                <span>Destination</span>
+                            </label>
+                            <select id="routeDestination" class="w-full p-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="Kandy" selected>Kandy (Goods Shed / Station)</option>
+                                <option value="Colombo">Colombo (Fort / Pettah)</option>
+                                <option value="Galle">Galle (Station / Highway)</option>
+                                <option value="Matara">Matara</option>
+                                <option value="Mahiyanganaya">Mahiyanganaya</option>
+                                <option value="Ella">Ella</option>
+                                <option value="Badulla">Badulla</option>
+                                <option value="Jaffna">Jaffna</option>
+                                <option value="Anuradhapura">Anuradhapura</option>
+                                <option value="Kurunegala">Kurunegala</option>
+                                <option value="Negombo">Negombo</option>
+                                <option value="Trincomalee">Trincomalee</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 mb-1 flex items-center space-x-1">
+                                <i class="fas fa-sliders-h text-blue-500 text-xs"></i>
+                                <span>Travel Mode</span>
+                            </label>
+                            <select id="routeMode" class="w-full p-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="fastest">🌟 Fastest Recommended (Any Mode)</option>
+                                <option value="train">🚆 Train Only (Express / Intercity)</option>
+                                <option value="bus">🚌 Bus Only (Expressway / CTB / Private)</option>
+                            </select>
+                        </div>
+
+                        <button onclick="findOptimizedRoute()" id="btnSubmitRoute"
+                            class="w-full bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white py-2 rounded-xl text-xs font-semibold transition-all shadow-md flex items-center justify-center space-x-1.5">
+                            <i class="fas fa-magic"></i>
+                            <span>Find Optimized Route</span>
+                        </button>
+
+                        <!-- Route Result Box -->
+                        <div id="routeResultBox" class="hidden mt-2 pt-2 border-t border-gray-200">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-[11px] font-bold text-gray-700 uppercase tracking-wider">Recommended Route</span>
+                                <span id="routeStatusBadge" class="text-[10px] bg-green-50 text-green-700 border border-green-200 px-1.5 py-0.5 rounded font-medium">Optimal</span>
+                            </div>
+                            <div id="routeResultContent" class="text-xs text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-2.5 border border-gray-200 max-h-40 overflow-y-auto">
+                                <!-- AI result populated here -->
+                            </div>
+                            <button onclick="askRouteInChat()" class="w-full mt-1.5 text-center text-xs text-blue-600 hover:text-blue-800 font-medium py-1">
+                                💬 Open & Ask details in Chat &rarr;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Leaflet Map Instance for Modal
+        let fullMapInstance = null;
+        let hubMarkers = [];
+        let activeRoutePath = null;
+        let lastOptimizedQuery = "";
+
+        const cityCoords = {
+            "Colombo": [6.9344, 79.8500],
+            "Kandy": [7.2906, 80.6337],
+            "Galle": [6.0535, 80.2210],
+            "Matara": [5.9549, 80.5550],
+            "Mahiyanganaya": [7.3167, 81.0000],
+            "Ella": [6.8667, 81.0466],
+            "Badulla": [6.9895, 81.0557],
+            "Jaffna": [9.6615, 80.0255],
+            "Anuradhapura": [8.3114, 80.4037],
+            "Kurunegala": [7.4863, 80.3623],
+            "Negombo": [7.2008, 79.8736],
+            "Trincomalee": [8.5874, 81.2152]
+        };
+
+        function toggleRoutePlanner() {
+            const panel = document.getElementById('routePlannerPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        async function findOptimizedRoute() {
+            const origin = document.getElementById('routeOrigin').value;
+            const dest = document.getElementById('routeDestination').value;
+            const mode = document.getElementById('routeMode').value;
+            const btn = document.getElementById('btnSubmitRoute');
+            const resultBox = document.getElementById('routeResultBox');
+            const resultContent = document.getElementById('routeResultContent');
+
+            if (origin === dest) {
+                alert("Please select different starting point and destination.");
+                return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Analyzing Optimal Route...</span>';
+            btn.disabled = true;
+
+            const queryText = `What is the best optimized route from ${origin} to ${dest} by ${mode}? Provide recommended departure times, travel duration, and route details.`;
+            lastOptimizedQuery = queryText;
+
+            try {
+                // Call live backend API /ask
+                const API_URL = window.SYNEXIS_API_URL || (window.location.protocol === "file:" ? "http://localhost:8000/ask" : "/ask");
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: queryText })
+                });
+
+                const data = await res.json();
+                const answer = data.final_answer || "No route details found.";
+
+                // Render result
+                resultBox.classList.remove('hidden');
+                resultContent.innerHTML = marked.parse(answer);
+
+                // Fetch Real Curved Route Geometry via OSRM
+                const start = cityCoords[origin];
+                const end = cityCoords[dest];
+
+                if (start && end && fullMapInstance) {
+                    if (activeRoutePath) {
+                        fullMapInstance.removeLayer(activeRoutePath);
+                    }
+
+                    try {
+                        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`;
+                        const osrmRes = await fetch(osrmUrl);
+                        const osrmData = await osrmRes.json();
+
+                        if (osrmData.routes && osrmData.routes.length > 0) {
+                            const geojsonCoords = osrmData.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                            activeRoutePath = L.polyline(geojsonCoords, {
+                                color: mode === 'train' ? '#2563eb' : '#16a34a',
+                                weight: 5,
+                                opacity: 0.95
+                            }).addTo(fullMapInstance);
+                            fullMapInstance.fitBounds(activeRoutePath.getBounds(), { padding: [60, 60] });
+                        } else {
+                            throw new Error("No OSRM geometry");
+                        }
+                    } catch (routeErr) {
+                        activeRoutePath = L.polyline([start, end], {
+                            color: '#2563eb',
+                            weight: 5,
+                            dashArray: '6, 6',
+                            opacity: 0.9
+                        }).addTo(fullMapInstance);
+                        fullMapInstance.fitBounds(activeRoutePath.getBounds(), { padding: [60, 60] });
+                    }
+                }
+            } catch (err) {
+                resultBox.classList.remove('hidden');
+                resultContent.innerHTML = `<p class="text-red-500">Error connecting to optimizer API: ${err.message}</p>`;
+            } finally {
+                btn.innerHTML = '<i class="fas fa-magic"></i><span>Find Optimized Route</span>';
+                btn.disabled = false;
+            }
+        }
+
+        function askRouteInChat() {
+            if (lastOptimizedQuery) {
+                closeMapModal();
+                const input = document.getElementById("userInput");
+                input.value = lastOptimizedQuery;
+                sendMessage();
+            }
+        }
+
+        function openMapModal() {
+            const modal = document.getElementById('mapModal');
+            const container = document.getElementById('mapModalContainer');
+            modal.classList.remove('hidden');
+            
+            // Animation
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                container.classList.remove('scale-95');
+                container.classList.add('scale-100');
+            }, 10);
+
+            // Initialize Map on first open
+            if (!fullMapInstance) {
+                initFullTransitMap();
+            } else {
+                setTimeout(() => {
+                    fullMapInstance.invalidateSize();
+                }, 200);
+            }
+
+            // Close mobile sidebar if open
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        function closeMapModal() {
+            const modal = document.getElementById('mapModal');
+            const container = document.getElementById('mapModalContainer');
+            
+            modal.classList.add('opacity-0');
+            container.classList.remove('scale-100');
+            container.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 250);
+        }
+
+        // Close modal on Escape key press
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMapModal();
+        });
+
+        function searchStations(query) {
+            if (!query || !fullMapInstance) return;
+            const q = query.toLowerCase().trim();
+            const found = hubMarkers.find(h => h.hubData.name.toLowerCase().includes(q));
+            if (found) {
+                fullMapInstance.flyTo(found.hubData.coords, 12, { animate: true, duration: 1.2 });
+                found.marker.openPopup();
+            }
+        }
+
+        function askStationQuery(stationName) {
+            closeMapModal();
+            const input = document.getElementById("userInput");
+            input.value = `What are the latest train and bus schedules for ${stationName}?`;
+            sendMessage();
+        }
+
+        function initFullTransitMap() {
+            // Center on Sri Lanka
+            fullMapInstance = L.map('fullMap', {
+                zoomControl: true
+            }).setView([7.8731, 80.7718], 8);
+
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(fullMapInstance);
+
+            // Key Hub Stations with Rich Data
+            const hubs = [
+                {
+                    name: "Colombo Fort Central Hub",
+                    badge: "Western Province • Main Terminus",
+                    coords: [6.9344, 79.8500],
+                    lines: "Coastal, Main, Northern & Kelani Valley Lines",
+                    trains: "Podi Menike (05:55 AM), Ruhunu Kumari (06:05 AM), Yal Devi (06:35 AM)",
+                    buses: "Pettah Bastian Mawatha Central Bus Stand (All island)"
+                },
+                {
+                    name: "Kandy Hub (Goods Shed)",
+                    badge: "Central Province • Hill Country Hub",
+                    coords: [7.2906, 80.6337],
+                    lines: "Main Line Railway & Central Expressway Corridors",
+                    trains: "Senkadagala Menike, Udarata Menike, Intercity AC Express",
+                    buses: "Goods Shed Bus Stand & EX-02 Colombo Highway Buses"
+                },
+                {
+                    name: "Galle Station & Highway Stand",
+                    badge: "Southern Province • Coastal Hub",
+                    coords: [6.0535, 80.2210],
+                    lines: "Coastal Railway & Southern Expressway EX-01",
+                    trains: "Ruhunu Kumari Express, Galle Express, Sagarika",
+                    buses: "Galle Highway Stand to Makumbura / Kottawa"
+                },
+                {
+                    name: "Ella Scenic Mountain Terminal",
+                    badge: "Uva Province • High Altitude Station",
+                    coords: [6.8667, 81.0466],
+                    lines: "Main Line Rail (Demodara Nine Arch Bridge)",
+                    trains: "Ella Odyssey Tourist Train, Night Mail Express",
+                    buses: "Ella Town Junction & Wellawaya Highway Connections"
+                },
+                {
+                    name: "Jaffna Northern Hub",
+                    badge: "Northern Province • Northern Terminus",
+                    coords: [9.6615, 80.0255],
+                    lines: "Northern Express Railway Line",
+                    trains: "Yal Devi Express, Uttara Devi, AC Intercity Express",
+                    buses: "Jaffna Central Bus Stand (Direct Colombo / Kandy buses)"
+                },
+                {
+                    name: "Makumbura Multimodal Center (Kottawa)",
+                    badge: "Western Province • Highway Interchange",
+                    coords: [6.8402, 79.9875],
+                    lines: "Expressway Highway Bus Network (EX-01, EX-02)",
+                    trains: "Kelani Valley Line (Makumbura Station)",
+                    buses: "Direct luxury AC buses to Galle, Matara, Hambantota, Kandy"
+                }
+            ];
+
+            hubMarkers = [];
+            hubs.forEach(hub => {
+                const marker = L.circleMarker(hub.coords, {
+                    radius: 7,
+                    fillColor: '#ffffff',
+                    color: '#0f172a',
+                    weight: 2.5,
+                    opacity: 1,
+                    fillOpacity: 1
+                }).addTo(fullMapInstance);
+
+                const popupHtml = `
+                    <div style="min-width: 220px;" class="p-1">
+                        <h4 class="font-bold text-gray-900 text-sm mb-0.5">${hub.name}</h4>
+                        <span class="inline-block text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-medium mb-2 border border-blue-200">${hub.badge}</span>
+                        <div class="text-xs text-gray-600 space-y-1 mb-2">
+                            <p><b>🚆 Lines:</b> ${hub.lines}</p>
+                            <p><b>🕒 Top Trains:</b> ${hub.trains}</p>
+                            <p><b>🚌 Buses:</b> ${hub.buses}</p>
+                        </div>
+                        <button onclick="askStationQuery('${hub.name}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-1.5 px-3 rounded-md font-medium transition-colors flex items-center justify-center space-x-1.5 shadow-xs">
+                            <i class="fas fa-comment-dots"></i>
+                            <span>Ask AI for Live Timetables</span>
+                        </button>
+                    </div>
+                `;
+
+                marker.bindPopup(popupHtml);
+                hubMarkers.push({ marker: marker, hubData: hub });
+            });
+
+            setTimeout(() => {
+                fullMapInstance.invalidateSize();
+            }, 200);
+        }
+
+        function sendQuickQuery(queryText) {
+            const input = document.getElementById("userInput");
+            input.value = queryText;
+            sendMessage();
+        }
+
         // Toggle sidebar on mobile
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.getElementById('overlay');
-        
-        menuToggle.addEventListener('click', function() {
+
+        menuToggle.addEventListener('click', function () {
             sidebar.classList.toggle('open');
             overlay.classList.toggle('active');
         });
-        
-        overlay.addEventListener('click', function() {
+
+        overlay.addEventListener('click', function () {
             sidebar.classList.remove('open');
             overlay.classList.remove('active');
         });
 
-        // Auto welcome with enhanced message
+        // Auto welcome with original clean message
         window.onload = () => {
-            appendMessage("Welcome to Sri Lanka Transport Assistant! I can help you with bus, train, and travel information across Sri Lanka. Ask me questions like:\n\n• මට කොළඹ සිට ගාල්ලට යන බස් රථ කීයට තියෙනවාද?\n• What time is the next train to Kandy?\n• கொழும்பிலிருந்து மாத்தளைக்கு பேருந்து எப்போது?\n\nI understand Sinhala, Tamil, and English!", "bot");
+            appendMessage("Welcome to Sri Lanka Transport Assistant! I can help you with bus, train, and travel information across Sri Lanka. Ask me questions like:\n\n• මට කොළඹ සිට ගාල්ලට යන බස් රථ කීයට තියෙනවාද?\n\n• What time is the next train to Kandy?\n\n• கொழும்பிலிருந்து மாத்தளைக்கு பேருந்து எப்போது?\n\nI understand Sinhala, Tamil, and English!", "bot");
         };
 
         async function sendMessage() {
@@ -360,20 +864,20 @@
 
             try {
                 // Dynamic API URL resolution with fallback for local dev, static serving, or remote hosting
-                const API_URL = window.SYNEXIS_API_URL || 
+                const API_URL = window.SYNEXIS_API_URL ||
                     (window.location.protocol === "file:" ? "http://localhost:8000/ask" : "/ask");
 
                 const res = await fetch(API_URL, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ query: text })
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: text })
                 });
 
                 const data = await res.json();
-                
+
                 // Remove typing indicator
                 removeTypingIndicator();
-                
+
                 appendMessage(data.final_answer || "Sorry, I couldn't find an answer. Please try rephrasing your question or ask about a different route.", "bot");
             } catch (err) {
                 removeTypingIndicator();
@@ -413,7 +917,7 @@
         function appendMessage(text, sender) {
             const box = document.getElementById("chatbox");
             const div = document.createElement("div");
-            
+
             if (sender === 'user') {
                 div.className = "flex justify-end";
                 div.innerHTML = `
@@ -441,7 +945,7 @@
                     </div>
                 `;
             }
-            
+
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
         }
@@ -454,18 +958,22 @@
         });
 
         // Auto-resize textarea
-        document.getElementById("userInput").addEventListener("input", function() {
+        document.getElementById("userInput").addEventListener("input", function () {
             this.style.height = "auto";
             this.style.height = (this.scrollHeight) + "px";
         });
-        
+
         // Handle window resize
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
             if (window.innerWidth > 768) {
                 sidebar.classList.remove('open');
                 overlay.classList.remove('active');
             }
+            if (fullMapInstance) {
+                fullMapInstance.invalidateSize();
+            }
         });
     </script>
 </body>
+
 </html>
